@@ -35,19 +35,19 @@ export function Navbar() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}
-      style={glass}
-    >
-      <div className="w-full px-8 flex items-center justify-between">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
 
         {/* Logo */}
         <button onClick={() => go("#home", "Home")} className="focus:outline-none">
           <LogoFull color="white" height={34} />
         </button>
 
-        {/* Centre links */}
-        <div className="hidden md:flex items-center gap-1 rounded-full px-2 py-2 transition-all duration-500">
+        {/* Centre pill — liquid glass */}
+        <div
+          className="hidden md:flex items-center gap-1 rounded-full px-2 py-2 transition-all duration-500"
+          style={glass}
+        >
           {links.map((l) => (
             <button
               key={l.label}
