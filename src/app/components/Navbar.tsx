@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { LogoFull } from "./Logo";
 
 const glass = {
   background: "rgba(255,255,255,0.06)",
