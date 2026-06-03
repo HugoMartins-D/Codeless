@@ -45,7 +45,7 @@ export function Navbar() {
         >
           {/* Logo dentro do pill */}
           <button onClick={() => go("#home", "Home")} className="focus:outline-none px-3">
-            <img src="/logobranca.png" height={20} alt="Logo" />
+            <img src="/logobranca.png" style={{ height: "20px", width: "auto" }} alt="Logo" />
           </button>
 
           <div className="w-px h-5 bg-white/20 mx-1" />
