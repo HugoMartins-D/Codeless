@@ -11,16 +11,16 @@ const glass = {
 } as React.CSSProperties;
 
 const links = [
-  { label: "Home",      href: "#home"     },
-  { label: "Projetos",  href: "#projetos" },
+  { label: "Home", href: "#home" },
+  { label: "Projetos", href: "#projetos" },
   { label: "Code Less", href: "#codeless" },
-  { label: "Contato",   href: "#contato"  },
+  { label: "Contato", href: "#contato" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive]     = useState("Home");
-  const [open, setOpen]         = useState(false);
+  const [active, setActive] = useState("Home");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
@@ -45,7 +45,7 @@ export function Navbar() {
         >
           {/* Logo dentro do pill */}
           <button onClick={() => go("#home", "Home")} className="focus:outline-none px-3">
-            <LogoFull color="white" height={28} />
+            <img src="/sua-logo.png" height={28} alt="Logo" />
           </button>
 
           <div className="w-px h-5 bg-white/20 mx-1" />
@@ -59,11 +59,11 @@ export function Navbar() {
                 fontFamily: "'Montserrat', sans-serif",
                 ...(active === l.label
                   ? {
-                      background: "rgba(255,255,255,0.90)",
-                      color: "#000",
-                      fontWeight: 700,
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.3)",
-                    }
+                    background: "rgba(255,255,255,0.90)",
+                    color: "#000",
+                    fontWeight: 700,
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.3)",
+                  }
                   : { color: "rgba(255,255,255,0.60)" }),
               }}
             >
