@@ -4,12 +4,12 @@ import { FeaturesSection } from "./components/FeaturesSection";
 import { ProjetosSection } from "./components/ProjetosSection";
 import { AboutSection } from "./components/AboutSection";
 import { CtaSection } from "./components/CtaSection";
-import { FluidBackground } from "./components/ui/fluid-background";
+import { WebGLShader } from "./components/ui/web-gl-shader";
 
 export default function App() {
   return (
     <div className="min-h-screen">
-      <FluidBackground />
+      <WebGLShader />
       <div className="relative" style={{ zIndex: 1 }}>
         <Navbar />
         <HeroSection />
