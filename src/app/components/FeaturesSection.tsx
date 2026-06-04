@@ -168,7 +168,7 @@ function GlassCard({ item, i }: { item: typeof items[0]; i: number }) {
 
 export function FeaturesSection() {
   return (
-    <section id="codeless" className="bg-black py-32 relative overflow-hidden">
+    <section id="codeless" className="py-32 relative overflow-hidden">
       {/* Background orbs for glass refraction context */}
       <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, #5252A814 0%, transparent 70%)", filter: "blur(40px)" }} />

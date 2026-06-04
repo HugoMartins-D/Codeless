@@ -3,7 +3,7 @@ import { LogoMarkGhost } from "./Logo";
 
 export function CtaSection() {
   return (
-    <section id="contato" className="bg-black py-32 relative overflow-hidden">
+    <section id="contato" className="py-32 relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute top-0 right-0 w-[700px] h-[700px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle at 80% 20%, #e93e8f12 0%, transparent 65%)", filter: "blur(40px)" }} />

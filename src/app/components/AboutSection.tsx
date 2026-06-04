@@ -9,7 +9,7 @@ const steps = [
 
 export function AboutSection() {
   return (
-    <section id="codeless-about" className="bg-black py-32 relative overflow-hidden">
+    <section id="codeless-about" className="py-32 relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, #5252A810 0%, transparent 70%)", filter: "blur(40px)" }} />

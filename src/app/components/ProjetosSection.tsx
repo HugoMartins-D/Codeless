@@ -162,7 +162,7 @@ function PlaceholderPill({ delay }: { delay: number }) {
 
 export function ProjetosSection() {
   return (
-    <section id="projetos" className="bg-black py-28 relative overflow-hidden">
+    <section id="projetos" className="py-28 relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, #F5C40018 0%, transparent 70%)", filter: "blur(60px)" }} />

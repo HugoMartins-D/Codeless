@@ -126,7 +126,7 @@ const stats = [
 /* ── Section ──────────────────────────────────────────────────────── */
 export function HeroSection() {
   return (
-    <section id="home" className="relative min-h-screen bg-black flex items-center overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Global ambient */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse 80% 60% at 70% 50%, #5252A80a 0%, transparent 70%)" }} />

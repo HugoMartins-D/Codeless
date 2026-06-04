@@ -8,7 +8,7 @@ import { FluidBackground } from "./components/ui/fluid-background";
 
 export default function App() {
   return (
-    <div className="bg-black min-h-screen">
+    <div className="min-h-screen">
       <FluidBackground />
       <div className="relative" style={{ zIndex: 1 }}>
         <Navbar />
