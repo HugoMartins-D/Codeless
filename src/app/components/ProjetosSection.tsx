@@ -1,111 +1,27 @@
 import { motion } from "motion/react";
-import svgPaths from "../../imports/Projetos/svg-ahqjqlyip3";
-import imgIPhone from "../../imports/Projetos/c3bc4f628aa6440f3a17b8acf698d3bc722160d7.png";
-import imgPointer from "../../imports/Projetos/a23646f847943e49b732804bf5832658ef125d53.png";
 
-function HelpSmartIcon() {
-  return (
-    <svg viewBox="0 0 31.0866 19.5402" fill="none" className="w-8 h-8">
-      <path d={svgPaths.p1212c300} fill="black" />
-      <path d={svgPaths.p2aeef00}  fill="black" />
-      <path d={svgPaths.p38109700} fill="black" />
-      <path d={svgPaths.pd653700}  fill="black" />
-      <path d={svgPaths.p23c4e300} fill="black" />
-      <path d={svgPaths.p7b1bdc0}  fill="black" />
-      <path d={svgPaths.p39356f30} fill="black" />
-      <path d={svgPaths.pf14a000}  fill="black" />
-      <path d={svgPaths.p2beb8280} fill="black" />
-    </svg>
-  );
-}
-
-function PointerIcon() {
-  return (
-    <svg viewBox="0 0 26.9092 36.5772" fill="none" className="w-6 h-8">
-      <path d={svgPaths.p1123ac80} fill="black" />
-      <path d={svgPaths.p2180a600} fill="black" />
-    </svg>
-  );
-}
-
-interface PillCardProps {
-  accentColor: string;
-  topLabel: React.ReactNode;
+interface BannerCardProps {
   image: string;
-  imageAlt: string;
-  badgeIcon: React.ReactNode;
+  alt: string;
   caption: string;
   delay: number;
 }
 
-function PillCard({ accentColor, topLabel, image, imageAlt, badgeIcon, caption, delay }: PillCardProps) {
+function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay }}
-      className="flex flex-col items-center"
+      className="flex flex-col items-center gap-4"
     >
-      {/* Pill — glass overlay on coloured bg */}
-      <div
-        className="relative overflow-hidden flex flex-col"
-        style={{
-          width: 240,
-          height: 390,
-          borderRadius: 120,
-          backgroundColor: accentColor,
-          boxShadow: `0 24px 60px ${accentColor}55, 0 4px 16px rgba(0,0,0,0.4)`,
-        }}
-      >
-        {/* Top specular sheen */}
-        <div
-          className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none z-10"
-          style={{
-            background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)",
-            borderRadius: "120px 120px 0 0",
-          }}
-        />
-        {/* Edge highlight */}
-        <div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            borderRadius: 120,
-            border: "1px solid rgba(255,255,255,0.30)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)",
-          }}
-        />
-
-        {/* Top label */}
-        <div className="relative z-20 flex items-center justify-center pt-7 pb-3 px-4 shrink-0">
-          {topLabel}
-        </div>
-
-        {/* Image */}
-        <div className="flex-1 relative overflow-hidden z-0">
-          <img src={image} alt={imageAlt}
-            className="absolute inset-0 w-full h-full object-cover object-top" />
-        </div>
-      </div>
-
-      {/* Badge — liquid glass circle */}
-      <div
-        className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center"
-        style={{
-          width: 92,
-          height: 92,
-          background: "rgba(255,255,255,0.85)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(255,255,255,0.60)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.70)",
-        }}
-      >
-        {badgeIcon}
-      </div>
-
-      {/* Caption */}
-      <p className="mt-4 text-white/40 text-xs tracking-[0.2em] uppercase"
+      <img
+        src={image}
+        alt={alt}
+        className="w-[240px] object-contain drop-shadow-2xl"
+      />
+      <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
         {caption}
       </p>
@@ -200,19 +116,9 @@ export function ProjetosSection() {
         </motion.div>
 
         {/* Cards */}
-        <div className="flex flex-wrap justify-center gap-12 md:gap-20">
-          <PillCard accentColor="#F5C400"
-            topLabel={<span className="text-black text-sm tracking-widest uppercase"
-              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>HELP SMART</span>}
-            image={imgIPhone} imageAlt="HelpSmart – aplicativo no iPhone"
-            badgeIcon={<HelpSmartIcon />} caption="HelpSmart" delay={0.1} />
-
-          <PillCard accentColor="#B5D400"
-            topLabel={<span className="text-black text-sm tracking-widest uppercase text-center"
-              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>POINTER SPORTS</span>}
-            image={imgPointer} imageAlt="Pointer Sports"
-            badgeIcon={<PointerIcon />} caption="Pointer Sports" delay={0.2} />
-
+        <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-end">
+          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
+          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
           <PlaceholderPill delay={0.3} />
         </div>
 
