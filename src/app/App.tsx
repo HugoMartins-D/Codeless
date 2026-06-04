@@ -10,7 +10,8 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <WebGLShader />
-      <div className="relative" style={{ zIndex: 1 }}>
+      <div className="fixed inset-0" style={{ zIndex: 1, background: "rgba(0,0,0,0.75)" }} />
+      <div className="relative" style={{ zIndex: 2 }}>
         <Navbar />
         <HeroSection />
         <ProjetosSection />
