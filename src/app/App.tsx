@@ -16,9 +16,9 @@ export default function App() {
         <Navbar />
         <HeroSection />
         <ProjetosSection />
-        <ProofSection />
         <FeaturesSection />
         <AboutSection />
+        <ProofSection />
         <CtaSection />
       </div>
     </div>
