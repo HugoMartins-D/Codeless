@@ -199,6 +199,7 @@ export function HeroSection() {
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                   filter: "drop-shadow(0 0 32px #5252A8aa)",
+                  fontSize: "clamp(2.5rem,4vw,4rem)",
                 }}
               >SOB MEDIDA</span>
             </motion.h1>
