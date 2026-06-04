@@ -9,10 +9,10 @@ import { WebGLShader } from "./components/ui/web-gl-shader";
 export default function App() {
   return (
     <div className="bg-black min-h-screen">
-      <div style={{ opacity: 0.25 }}>
-        <WebGLShader />
-      </div>
-      <div className="relative" style={{ zIndex: 1 }}>
+      <WebGLShader />
+      {/* overlay to dim the shader so content stays readable */}
+      <div className="fixed inset-0" style={{ background: "rgba(0,0,0,0.72)", zIndex: 1 }} />
+      <div className="relative" style={{ zIndex: 2 }}>
         <Navbar />
         <HeroSection />
         <ProjetosSection />
