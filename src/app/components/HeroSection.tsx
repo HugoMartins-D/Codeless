@@ -105,9 +105,9 @@ function HeroVisual() {
 
       {/* ── Corner brackets ── */}
       {[
-        { top: "8%", left: "8%",  borderTop: "2px solid", borderLeft: "2px solid" },
+        { top: "8%", left: "8%", borderTop: "2px solid", borderLeft: "2px solid" },
         { top: "8%", right: "8%", borderTop: "2px solid", borderRight: "2px solid" },
-        { bottom: "8%", left: "8%",  borderBottom: "2px solid", borderLeft: "2px solid" },
+        { bottom: "8%", left: "8%", borderBottom: "2px solid", borderLeft: "2px solid" },
         { bottom: "8%", right: "8%", borderBottom: "2px solid", borderRight: "2px solid" },
       ].map((s, i) => (
         <div key={i} className="absolute w-6 h-6 border-[#5252A8]/40" style={s as React.CSSProperties} />
@@ -115,11 +115,11 @@ function HeroVisual() {
 
       {/* ── Particle dots ── */}
       {[
-        { top: "14%", left: "22%",  size: 3, color: "#c7d300", opacity: 0.7 },
+        { top: "14%", left: "22%", size: 3, color: "#c7d300", opacity: 0.7 },
         { top: "28%", right: "18%", size: 2, color: "#e93e8f", opacity: 0.5 },
         { bottom: "20%", left: "18%", size: 2, color: "#5252A8", opacity: 0.8 },
         { bottom: "30%", right: "22%", size: 3, color: "#c7d300", opacity: 0.4 },
-        { top: "50%", left: "9%",  size: 2, color: "#e93e8f", opacity: 0.6 },
+        { top: "50%", left: "9%", size: 2, color: "#e93e8f", opacity: 0.6 },
         { top: "45%", right: "9%", size: 2, color: "#5252A8", opacity: 0.5 },
       ].map((p, i) => (
         <motion.div key={i}
@@ -155,9 +155,9 @@ function HeroVisual() {
 
 /* ── Stats row ────────────────────────────────────────────────────── */
 const stats = [
-  { value: "Com & Sem", label: "Código"     },
-  { value: "100%",      label: "Exclusivos" },
-  { value: "0",         label: "Templates"  },
+  { value: "Com & Sem", label: "Código" },
+  { value: "100%", label: "Exclusivos" },
+  { value: "0", label: "Templates" },
 ];
 
 /* ── Section ──────────────────────────────────────────────────────── */
@@ -200,7 +200,7 @@ export function HeroSection() {
                   backgroundClip: "text",
                   filter: "drop-shadow(0 0 32px #5252A8aa)",
                 }}
-              >Sob Medida</span>
+              >SOB MEDIDA</span>
             </motion.h1>
 
             {/* Sub */}
