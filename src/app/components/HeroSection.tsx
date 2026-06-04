@@ -188,7 +188,7 @@ export function HeroSection() {
             <motion.h1
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
               className="text-white leading-[1.15] mb-6"
-              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: "clamp(3.5rem,5.5vw,5.5rem)" }}
+              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: "clamp(2rem,3.5vw,3.5rem)" }}
             >
               Criação<br />
               de Sites<br />
