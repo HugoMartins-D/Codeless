@@ -11,7 +11,7 @@ export default function App() {
     <div className="bg-black min-h-screen">
       <WebGLShader />
       {/* overlay to dim the shader so content stays readable */}
-      <div className="fixed inset-0" style={{ background: "rgba(0,0,0,0.72)", zIndex: 1 }} />
+      <div className="fixed inset-0" style={{ background: "rgba(0,0,0,0.55)", zIndex: 1 }} />
       <div className="relative" style={{ zIndex: 2 }}>
         <Navbar />
         <HeroSection />
