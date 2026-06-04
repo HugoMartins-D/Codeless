@@ -4,6 +4,7 @@ import { FeaturesSection } from "./components/FeaturesSection";
 import { ProjetosSection } from "./components/ProjetosSection";
 import { AboutSection } from "./components/AboutSection";
 import { CtaSection } from "./components/CtaSection";
+import { ProofSection } from "./components/ProofSection";
 import { WebGLShader } from "./components/ui/web-gl-shader";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Navbar />
         <HeroSection />
         <ProjetosSection />
+        <ProofSection />
         <FeaturesSection />
         <AboutSection />
         <CtaSection />
