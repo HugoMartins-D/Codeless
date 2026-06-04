@@ -49,11 +49,17 @@ export function WebGLShader() {
           float gx = p.x;
           float bx = p.x * (1.0 - d);
 
-          float r = 0.05 / abs(p.y + sin((rx + time) * xScale) * yScale);
-          float g = 0.05 / abs(p.y + sin((gx + time) * xScale) * yScale);
-          float b = 0.05 / abs(p.y + sin((bx + time) * xScale) * yScale);
+          float i1 = 0.05 / abs(p.y + sin((rx + time) * xScale) * yScale);
+          float i2 = 0.05 / abs(p.y + sin((gx + time) * xScale) * yScale);
+          float i3 = 0.05 / abs(p.y + sin((bx + time) * xScale) * yScale);
 
-          gl_FragColor = vec4(r, g, b, 1.0);
+          // Code Less brand colors
+          vec3 purple = vec3(0.322, 0.322, 0.659); // #5252A8
+          vec3 pink   = vec3(0.914, 0.243, 0.561); // #e93e8f
+          vec3 lime   = vec3(0.780, 0.827, 0.000); // #c7d300
+
+          vec3 col = i1 * purple + i2 * pink + i3 * lime;
+          gl_FragColor = vec4(col, 1.0);
         }
       `,
     })
