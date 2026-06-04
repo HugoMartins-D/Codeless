@@ -113,7 +113,7 @@ export function CtaSection() {
               <path d="M27.5343 33.5975C27.5343 31.5075 27.5207 29.4155 27.5285 27.3236C27.5362 25.0018 27.5479 22.6662 27.5615 20.3386C27.5673 19.3977 27.6644 18.4136 27.5964 17.4727C27.5634 17.015 27.3323 16.7125 26.9089 16.5534L11.9886 10.5898L12.1207 6.22324L28.6258 12.8075C30.3602 13.5539 31.5334 15.2413 31.6674 17.1446L31.5955 35.0648L31.5334 35.1041L27.5323 33.5975H27.5343Z" fill="white"/>
             </svg>
             <span className="text-white text-xs tracking-widest"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}>CODE LESS © 2024</span>
+              style={{ fontFamily: "'Montserrat', sans-serif" }}>CODE LESS © 2026</span>
           </div>
 
           {["Instagram"].map((s) => (
