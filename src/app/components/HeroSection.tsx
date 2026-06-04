@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
 import { LogoMarkLarge } from "./Logo";
-import { ShaderAnimation } from "./ui/shader-lines";
 
 /* ── Floating stat card ───────────────────────────────────────────── */
 function StatCard({
@@ -42,19 +41,67 @@ function StatCard({
 /* ── Hero visual ──────────────────────────────────────────────────── */
 function HeroVisual() {
   return (
-    <div className="relative flex items-center justify-center overflow-hidden rounded-2xl" style={{ width: 560, height: 580 }}>
+    <div className="relative flex items-center justify-center" style={{ width: 560, height: 580 }}>
 
-      {/* ── Shader background ── */}
-      <ShaderAnimation />
+      {/* ── Glow layers ── */}
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ inset: "10%", background: "radial-gradient(circle, #5252A8 0%, transparent 65%)", filter: "blur(55px)", opacity: 0.55 }} />
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ inset: "18%", background: "radial-gradient(circle at 35% 65%, #e93e8f 0%, transparent 60%)", filter: "blur(50px)", opacity: 0.3 }} />
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ inset: "25%", background: "radial-gradient(circle at 65% 35%, #c7d300 0%, transparent 55%)", filter: "blur(60px)", opacity: 0.18 }} />
 
-      {/* ── Dark overlay so logo pops ── */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(circle at 50% 50%, transparent 30%, rgba(0,0,0,0.7) 100%)" }} />
+      {/* ── Rotating outer ring ── */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+        className="absolute rounded-full border border-dashed border-white/10"
+        style={{ inset: "4%" }}
+      >
+        {[0, 90, 180, 270].map((deg) => (
+          <div key={deg} className="absolute w-2 h-2 rounded-full bg-[#5252A8]/60"
+            style={{ top: "50%", left: "50%", transform: `rotate(${deg}deg) translateX(260px) translateY(-50%)` }} />
+        ))}
+      </motion.div>
+
+      {/* ── Rotating inner ring ── */}
+      <motion.div
+        animate={{ rotate: -360 }}
+        transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
+        className="absolute rounded-full border border-[#e93e8f]/15"
+        style={{ inset: "15%" }}
+      >
+        {[45, 135, 225, 315].map((deg) => (
+          <div key={deg} className="absolute w-1.5 h-1.5 rounded-full bg-[#e93e8f]/50"
+            style={{ top: "50%", left: "50%", transform: `rotate(${deg}deg) translateX(210px) translateY(-50%)` }} />
+        ))}
+      </motion.div>
+
+      {/* ── Static ring ── */}
+      <div className="absolute rounded-full border border-white/[0.04]" style={{ inset: "22%" }} />
+
+      {/* ── Scanning line ── */}
+      <motion.div
+        animate={{ top: ["20%", "80%", "20%"] }}
+        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        className="absolute left-[15%] right-[15%] h-px pointer-events-none"
+        style={{ background: "linear-gradient(90deg, transparent, #5252A8, #e93e8f, transparent)", opacity: 0.4 }}
+      />
+
+      {/* ── Corner brackets ── */}
+      {[
+        { top: "8%", left: "8%", borderTop: "2px solid", borderLeft: "2px solid" },
+        { top: "8%", right: "8%", borderTop: "2px solid", borderRight: "2px solid" },
+        { bottom: "8%", left: "8%", borderBottom: "2px solid", borderLeft: "2px solid" },
+        { bottom: "8%", right: "8%", borderBottom: "2px solid", borderRight: "2px solid" },
+      ].map((s, i) => (
+        <div key={i} className="absolute w-6 h-6 border-[#5252A8]/40" style={s as React.CSSProperties} />
+      ))}
 
       {/* ── Central logo ── */}
       <div className="relative z-10 drop-shadow-2xl" style={{ width: 260, height: 305 }}>
         <div className="absolute inset-[-20%] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #5252A840 0%, transparent 70%)", filter: "blur(30px)" }} />
+          style={{ background: "radial-gradient(circle, #5252A830 0%, transparent 70%)", filter: "blur(20px)" }} />
         <LogoMarkLarge color="white" />
       </div>
 
