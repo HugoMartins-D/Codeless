@@ -36,10 +36,11 @@ function PlaceholderPill({ delay }: { delay: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay }}
-      className="flex flex-col items-center"
+      className="flex flex-col items-center cursor-pointer group"
+      onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
     >
       <div
-        className="flex items-center justify-center"
+        className="flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40 group-hover:bg-white/5"
         style={{
           width: 240,
           height: 390,
@@ -51,11 +52,15 @@ function PlaceholderPill({ delay }: { delay: number }) {
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
         }}
       >
-        <span className="text-white/20 text-xs tracking-[0.2em] uppercase rotate-90 select-none"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}>Em breve</span>
+        <span
+          className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
+          O SEU PODE SER O PRÓXIMO
+        </span>
       </div>
       <div
-        className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center"
+        className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[#c7d300]/20"
         style={{
           width: 92,
           height: 92,
@@ -66,7 +71,7 @@ function PlaceholderPill({ delay }: { delay: number }) {
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
         }}
       >
-        <span className="text-white/25 text-3xl font-light">+</span>
+        <span className="text-white/25 text-3xl font-light group-hover:text-[#c7d300]/60 transition-colors duration-300">+</span>
       </div>
       <p className="mt-4 text-white/20 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
@@ -119,7 +124,8 @@ export function ProjetosSection() {
         <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-end">
           <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
           <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
-          <PlaceholderPill delay={0.3} />
+          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
+          <PlaceholderPill delay={0.4} />
         </div>
 
         {/* CTA — glass button */}
