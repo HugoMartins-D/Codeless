@@ -219,7 +219,7 @@ export function HeroSection() {
               className="flex flex-wrap gap-3 mb-14"
             >
               <button
-                onClick={() => document.querySelector("#contato")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
                 className="relative overflow-hidden px-7 py-3.5 rounded-full text-black text-sm
                            hover:scale-105 active:scale-95 transition-transform"
                 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, background: "#c7d300" }}

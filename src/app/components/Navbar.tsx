@@ -99,7 +99,7 @@ export function Navbar() {
             </button>
           ))}
           <button
-            onClick={() => go("#contato", "Contato")}
+            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
             className="mt-2 px-4 py-3 rounded-xl text-white text-sm text-center font-semibold transition-all hover:scale-105"
             style={{
               fontFamily: "'Montserrat', sans-serif",

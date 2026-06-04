@@ -223,7 +223,7 @@ export function ProjetosSection() {
           className="mt-20 text-center"
         >
           <button
-            onClick={() => document.querySelector("#contato")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
             className="px-10 py-4 rounded-full text-white text-sm tracking-widest transition-all hover:scale-105 active:scale-95"
             style={{
               fontFamily: "'Montserrat', sans-serif",
