@@ -19,7 +19,7 @@ function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
       <img
         src={image}
         alt={alt}
-        className="w-[240px] object-contain drop-shadow-2xl"
+        className="w-[240px] h-[390px] object-contain drop-shadow-2xl"
       />
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
@@ -121,7 +121,7 @@ export function ProjetosSection() {
         </motion.div>
 
         {/* Cards */}
-        <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-end">
+        <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-center">
           <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
           <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
           <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
