@@ -18,11 +18,11 @@ function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) 
       transition={{ duration: 0.6, delay }}
       className="flex flex-col items-center gap-4"
     >
-      <GlowCard glowColor={glowColor} width={240} height={390} borderRadius={120}>
+      <GlowCard glowColor={glowColor} width={240} height={390} borderRadius={120} transparent>
         <img
           src={image}
           alt={alt}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain drop-shadow-2xl"
         />
       </GlowCard>
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"

@@ -8,6 +8,8 @@ interface GlowCardProps {
   height?: string | number;
   /** px value — controls both visual border-radius and the glow pseudo-elements */
   borderRadius?: number;
+  /** When true: no background, only the glowing border outline */
+  transparent?: boolean;
 }
 
 const glowColorMap = {
@@ -77,6 +79,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
   width,
   height,
   borderRadius,
+  transparent = false,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -102,8 +105,8 @@ export const GlowCard: React.FC<GlowCardProps> = ({
     '--spread': spread,
     '--radius': radius,
     '--border': '2',
-    '--backdrop': 'hsl(0 0% 8% / 0.85)',
-    '--backup-border': 'rgba(255,255,255,0.08)',
+    '--backdrop': transparent ? 'transparent' : 'hsl(0 0% 8% / 0.85)',
+    '--backup-border': transparent ? 'transparent' : 'rgba(255,255,255,0.08)',
     '--size': '220',
     '--outer': '1',
     '--border-size': 'calc(var(--border, 2) * 1px)',
