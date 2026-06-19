@@ -1,15 +1,47 @@
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { GlowCard } from "./ui/spotlight-card";
+
+const glowHex: Record<string, string> = {
+  purple: "#5252A8",
+  blue:   "#4A90D9",
+  red:    "#FF2D55",
+  green:  "#c7d300",
+  orange: "#FF7A00",
+};
 
 interface BannerCardProps {
   image: string;
   alt: string;
   caption: string;
   delay: number;
-  glowColor: 'blue' | 'purple' | 'green' | 'red' | 'orange';
+  glowColor: keyof typeof glowHex;
 }
 
 function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [intensity, setIntensity] = useState(0);
+  const color = glowHex[glowColor];
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      if (!ref.current) return;
+      const r = ref.current.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+      const maxD = Math.hypot(r.width, r.height) * 0.75;
+      setIntensity(Math.max(0, 1 - dist / maxD));
+    };
+    document.addEventListener("pointermove", onMove);
+    return () => document.removeEventListener("pointermove", onMove);
+  }, []);
+
+  const glow = intensity;
+  const borderAlpha = Math.round((0.15 + glow * 0.7) * 255).toString(16).padStart(2, "0");
+  const shadowBlur  = 12 + glow * 28;
+  const shadowSpread = glow * 6;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -18,13 +50,24 @@ function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) 
       transition={{ duration: 0.6, delay }}
       className="flex flex-col items-center gap-4"
     >
-      <GlowCard glowColor={glowColor} width={240} height={390} borderRadius={120} transparent>
+      <div
+        ref={ref}
+        style={{
+          width: 240,
+          height: 390,
+          borderRadius: 120,
+          border: `1.5px solid ${color}${borderAlpha}`,
+          boxShadow: `0 0 ${shadowBlur}px ${shadowSpread}px ${color}${Math.round(glow * 180).toString(16).padStart(2, "0")}`,
+          transition: "box-shadow 0.12s ease, border-color 0.12s ease",
+          overflow: "hidden",
+        }}
+      >
         <img
           src={image}
           alt={alt}
           className="w-full h-full object-contain drop-shadow-2xl"
         />
-      </GlowCard>
+      </div>
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
         {caption}
