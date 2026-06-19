@@ -150,11 +150,11 @@ export function HeroSection() {
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-white leading-[1.15] mb-6"
-              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: "clamp(2rem,3.5vw,3.5rem)" }}
+              className="text-white leading-[1.12] mb-6"
+              style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: "clamp(2rem,3.5vw,3.5rem)", letterSpacing: "-0.02em" }}
             >
-              Criação<br />
-              de Sites<br />
+              Construímos<br />
+              experiências digitais<br />
               <span
                 style={{
                   background: "linear-gradient(135deg, #7b7de8 0%, #5252A8 40%, #e93e8f 100%)",
@@ -162,9 +162,8 @@ export function HeroSection() {
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                   filter: "drop-shadow(0 0 32px #5252A8aa)",
-                  fontSize: "clamp(2.5rem,4vw,4rem)",
                 }}
-              >SOB MEDIDA</span>
+              >que posicionam<br />sua marca.</span>
             </motion.h1>
 
             {/* Sub */}
@@ -173,7 +172,7 @@ export function HeroSection() {
               className="text-white/45 text-base leading-relaxed mb-10 max-w-sm"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
-              Inovação que transforma sua presença digital, sem complicação. Cada projeto pensado do zero para a sua marca.
+              Sites institucionais, landing pages e sistemas personalizados desenvolvidos com ou sem código, focados em performance, conversão e crescimento.
             </motion.p>
 
             {/* CTAs */}
