@@ -1,47 +1,13 @@
-import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { GlowCard } from "./ui/spotlight-card";
-
-const glowHex: Record<string, string> = {
-  purple: "#5252A8",
-  blue:   "#4A90D9",
-  red:    "#FF2D55",
-  green:  "#c7d300",
-  orange: "#FF7A00",
-};
 
 interface BannerCardProps {
   image: string;
   alt: string;
   caption: string;
   delay: number;
-  glowColor: keyof typeof glowHex;
 }
 
-function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [intensity, setIntensity] = useState(0);
-  const color = glowHex[glowColor];
-
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      if (!ref.current) return;
-      const r = ref.current.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-      const maxD = Math.hypot(r.width, r.height) * 0.75;
-      setIntensity(Math.max(0, 1 - dist / maxD));
-    };
-    document.addEventListener("pointermove", onMove);
-    return () => document.removeEventListener("pointermove", onMove);
-  }, []);
-
-  const glow = intensity;
-  const borderAlpha = Math.round((0.15 + glow * 0.7) * 255).toString(16).padStart(2, "0");
-  const shadowBlur  = 12 + glow * 28;
-  const shadowSpread = glow * 6;
-
+function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -50,24 +16,11 @@ function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) 
       transition={{ duration: 0.6, delay }}
       className="flex flex-col items-center gap-4"
     >
-      <div
-        ref={ref}
-        style={{
-          width: 240,
-          height: 390,
-          borderRadius: 120,
-          border: `1.5px solid ${color}${borderAlpha}`,
-          boxShadow: `0 0 ${shadowBlur}px ${shadowSpread}px ${color}${Math.round(glow * 180).toString(16).padStart(2, "0")}`,
-          transition: "box-shadow 0.12s ease, border-color 0.12s ease",
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src={image}
-          alt={alt}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <img
+        src={image}
+        alt={alt}
+        className="w-[240px] object-contain drop-shadow-2xl"
+      />
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
         {caption}
@@ -86,22 +39,26 @@ function PlaceholderPill({ delay }: { delay: number }) {
       className="flex flex-col items-center cursor-pointer group"
       onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
     >
-      <GlowCard
-        glowColor="green"
-        width={240}
-        height={390}
-        borderRadius={120}
+      <div
+        className="flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40 group-hover:bg-white/5"
+        style={{
+          width: 240,
+          height: 390,
+          borderRadius: 120,
+          background: "rgba(255,255,255,0.03)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
       >
-        <div className="flex items-center justify-center w-full h-full">
-          <span
-            className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
-            O SEU PODE SER O PRÓXIMO
-          </span>
-        </div>
-      </GlowCard>
-
+        <span
+          className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
+          O SEU PODE SER O PRÓXIMO
+        </span>
+      </div>
       <div
         className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[#c7d300]/20"
         style={{
@@ -165,9 +122,9 @@ export function ProjetosSection() {
 
         {/* Cards */}
         <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-end">
-          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} glowColor="purple" />
-          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} glowColor="blue" />
-          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} glowColor="red" />
+          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
+          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
+          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
           <PlaceholderPill delay={0.4} />
         </div>
 
