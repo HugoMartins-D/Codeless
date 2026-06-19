@@ -1,13 +1,15 @@
 import { motion } from "motion/react";
+import { GlowCard } from "./ui/spotlight-card";
 
 interface BannerCardProps {
   image: string;
   alt: string;
   caption: string;
   delay: number;
+  glowColor: 'blue' | 'purple' | 'green' | 'red' | 'orange';
 }
 
-function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
+function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -16,11 +18,13 @@ function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
       transition={{ duration: 0.6, delay }}
       className="flex flex-col items-center gap-4"
     >
-      <img
-        src={image}
-        alt={alt}
-        className="w-[240px] object-contain drop-shadow-2xl"
-      />
+      <GlowCard glowColor={glowColor} width={240} height={390}>
+        <img
+          src={image}
+          alt={alt}
+          className="w-full h-full object-cover"
+        />
+      </GlowCard>
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
         {caption}
@@ -122,9 +126,9 @@ export function ProjetosSection() {
 
         {/* Cards */}
         <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-end">
-          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
-          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
-          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
+          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} glowColor="purple" />
+          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} glowColor="blue" />
+          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} glowColor="red" />
           <PlaceholderPill delay={0.4} />
         </div>
 
