@@ -107,6 +107,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
     '--border': '2',
     '--backdrop': transparent ? 'transparent' : 'hsl(0 0% 8% / 0.85)',
     '--backup-border': transparent ? 'transparent' : 'rgba(255,255,255,0.08)',
+    '--bg-spot-opacity': transparent ? '0' : '0.08',
     '--size': '220',
     '--outer': '1',
     '--border-size': 'calc(var(--border, 2) * 1px)',
@@ -138,7 +139,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
         ref={cardRef}
         data-glow
         style={inlineStyles}
-        className={`relative overflow-hidden shadow-[0_1rem_2rem_-1rem_black] backdrop-blur-sm ${className}`}
+        className={`relative ${transparent ? 'overflow-visible' : 'overflow-hidden shadow-[0_1rem_2rem_-1rem_black] backdrop-blur-sm'} ${className}`}
       >
         <div data-glow />
         {children}
