@@ -65,7 +65,7 @@ function BannerCard({ image, alt, caption, delay, glowColor }: BannerCardProps) 
         <img
           src={image}
           alt={alt}
-          className="w-full h-full object-contain drop-shadow-2xl"
+          className="w-full h-full object-cover"
         />
       </div>
       <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
