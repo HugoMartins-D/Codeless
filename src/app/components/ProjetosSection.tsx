@@ -43,26 +43,22 @@ function PlaceholderPill({ delay }: { delay: number }) {
       className="flex flex-col items-center cursor-pointer group"
       onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
     >
-      <div
-        className="flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40 group-hover:bg-white/5"
-        style={{
-          width: 240,
-          height: 390,
-          borderRadius: 120,
-          background: "rgba(255,255,255,0.03)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
-        }}
+      <GlowCard
+        glowColor="green"
+        width={240}
+        height={390}
+        borderRadius={120}
       >
-        <span
-          className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
-        >
-          O SEU PODE SER O PRÓXIMO
-        </span>
-      </div>
+        <div className="flex items-center justify-center w-full h-full">
+          <span
+            className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            O SEU PODE SER O PRÓXIMO
+          </span>
+        </div>
+      </GlowCard>
+
       <div
         className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[#c7d300]/20"
         style={{

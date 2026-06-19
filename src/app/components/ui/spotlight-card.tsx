@@ -6,6 +6,8 @@ interface GlowCardProps {
   glowColor?: 'blue' | 'purple' | 'green' | 'red' | 'orange';
   width?: string | number;
   height?: string | number;
+  /** px value — controls both visual border-radius and the glow pseudo-elements */
+  borderRadius?: number;
 }
 
 const glowColorMap = {
@@ -74,6 +76,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
   glowColor = 'purple',
   width,
   height,
+  borderRadius,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -92,11 +95,12 @@ export const GlowCard: React.FC<GlowCardProps> = ({
   }, []);
 
   const { base, spread } = glowColorMap[glowColor];
+  const radius = borderRadius ?? 16;
 
   const inlineStyles: React.CSSProperties & Record<string, string | number> = {
     '--base': base,
     '--spread': spread,
-    '--radius': '16',
+    '--radius': radius,
     '--border': '2',
     '--backdrop': 'hsl(0 0% 8% / 0.85)',
     '--backup-border': 'rgba(255,255,255,0.08)',
@@ -117,6 +121,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
     backgroundPosition: '50% 50%',
     backgroundAttachment: 'fixed',
     border: 'var(--border-size) solid var(--backup-border)',
+    borderRadius: `${radius}px`,
     position: 'relative',
     touchAction: 'none',
     ...(width  !== undefined ? { width:  typeof width  === 'number' ? `${width}px`  : width  } : {}),
@@ -130,7 +135,7 @@ export const GlowCard: React.FC<GlowCardProps> = ({
         ref={cardRef}
         data-glow
         style={inlineStyles}
-        className={`rounded-2xl relative overflow-hidden shadow-[0_1rem_2rem_-1rem_black] backdrop-blur-sm ${className}`}
+        className={`relative overflow-hidden shadow-[0_1rem_2rem_-1rem_black] backdrop-blur-sm ${className}`}
       >
         <div data-glow />
         {children}
