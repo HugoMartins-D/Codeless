@@ -48,7 +48,7 @@ export function AboutSection() {
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-5 h-px bg-white/20" />
                   <span className="text-white/30 text-xs tracking-[0.3em] uppercase"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}>Sobre nós</span>
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}>Quem somos e como trabalhamos</span>
                 </div>
                 {/* Headline */}
                 <p className="text-white/60 text-base leading-relaxed max-w-xl"

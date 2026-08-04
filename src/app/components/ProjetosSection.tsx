@@ -1,10 +1,46 @@
 import { motion } from "motion/react";
+import ScrollFloat from "./ui/ScrollFloat";
 
 interface BannerCardProps {
   image: string;
   alt: string;
   caption: string;
   delay: number;
+}
+
+/* ── Large featured card — hero-style project showcase ── */
+function FeaturedCard({ image, alt, caption, delay }: BannerCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className="group relative overflow-hidden rounded-3xl cursor-pointer"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+      }}
+      onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+    >
+      <div className="flex items-center justify-center p-8 md:p-14" style={{ minHeight: 340 }}>
+        <img
+          src={image}
+          alt={alt}
+          className="max-h-[280px] w-auto object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+      </div>
+      <div className="relative z-10 px-8 pb-6 flex items-center justify-between border-t border-white/6 pt-5">
+        <p className="text-white text-sm tracking-wide"
+          style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
+          {caption}
+        </p>
+        <span className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors">Ver projeto →</span>
+      </div>
+    </motion.div>
+  );
 }
 
 function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
@@ -92,12 +128,11 @@ export function ProjetosSection() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.6 }}
-          className="mb-20 text-center"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6"
+        <div className="mb-20 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6"
             style={{
               background: "rgba(233,62,143,0.10)",
               backdropFilter: "blur(12px)",
@@ -107,23 +142,30 @@ export function ProjetosSection() {
             <span className="w-1.5 h-1.5 rounded-full bg-[#e93e8f]" />
             <span className="text-[#e93e8f] text-xs tracking-widest uppercase"
               style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>Nosso portfólio</span>
-          </div>
-          <h2 className="text-white"
-            style={{
+          </motion.div>
+          <ScrollFloat
+            containerClassName="text-center"
+            textClassName="text-white"
+            textStyle={{
               fontFamily: "'Montserrat', sans-serif",
               fontWeight: 900,
               fontSize: "clamp(3rem,8vw,6rem)",
               lineHeight: 1,
               letterSpacing: "-0.02em",
-            }}>
+            }}
+          >
             PROJETOS
-          </h2>
-        </motion.div>
+          </ScrollFloat>
+        </div>
 
-        {/* Cards */}
-        <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-center">
-          <BannerCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
-          <BannerCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
+        {/* Featured — 2 large cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <FeaturedCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
+          <FeaturedCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
+        </div>
+
+        {/* Grid — remaining projects */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
           <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
           <PlaceholderPill delay={0.4} />
         </div>

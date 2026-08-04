@@ -187,13 +187,12 @@ export function FeaturesSection() {
               style={{ backdropFilter: "blur(12px)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-[#e93e8f]" />
               <span className="text-[#e93e8f] text-xs tracking-widest uppercase"
-                style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>Por que nos escolher</span>
+                style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>Nossos diferenciais</span>
             </span>
             <h2 className="text-white leading-tight"
               style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: "clamp(2.2rem,4.5vw,3.5rem)" }}>
-              Por que um site<br />
-              da <span style={{ color: "#5252A8" }}>CODE LESS</span><br />
-              faz a diferença?
+              O que nos torna<br />
+              <span style={{ color: "#5252A8" }}>diferentes</span>.
             </h2>
           </motion.div>
 
