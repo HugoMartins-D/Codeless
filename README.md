@@ -1,11 +1,17 @@
+# CODE LESS
 
-  # Landing page design
+Landing page da CODE LESS — agência de criação de sites sob medida.
 
-  This is a code bundle for Landing page design. The original project is available at https://www.figma.com/design/6aSoAJ8kGFAv2fQNXlsHrD/Landing-page-design.
+## Rodando o projeto
 
-  ## Running the code
+```bash
+pnpm install
+pnpm dev
+```
 
-  Run `npm i` to install the dependencies.
+## Build de produção
 
-  Run `npm run dev` to start the development server.
-  
+```bash
+pnpm build
+pnpm preview
+```
