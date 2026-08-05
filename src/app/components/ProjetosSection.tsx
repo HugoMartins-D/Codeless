@@ -1,15 +1,137 @@
 import { motion } from "motion/react";
 import ScrollFloat from "./ui/ScrollFloat";
 
-interface BannerCardProps {
+interface ShowcaseProject {
+  title: string;
+  year: string;
+  tags: string[];
   image: string;
-  alt: string;
-  caption: string;
-  delay: number;
+  /** Caminho de um .mp4/.webm em /public. Se vazio, mostra a imagem. */
+  video?: string;
+  glow: string;
+}
+
+const projects: ShowcaseProject[] = [
+  {
+    title: "HelpSmart",
+    year: "2026",
+    tags: ["Site institucional", "UI/UX", "Performance"],
+    image: "/BANNERHELP.png",
+    video: "/helpsmart.mp4",
+    glow: "#c7d300",
+  },
+  {
+    title: "Soarts Films",
+    year: "2026",
+    tags: ["Branding", "Social", "Vídeo"],
+    image: "/BANNERSOARTS.png",
+    video: "",
+    glow: "#e93e8f",
+  },
+];
+
+/* ── Diagonal stripe texture — brand-colored glow bleeding into the dark ── */
+function StripedBackdrop({ color }: { color: string }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `repeating-linear-gradient(115deg, ${color}22 0px, ${color}22 1px, transparent 1px, transparent 7px)`,
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: `radial-gradient(ellipse 60% 90% at 0% 30%, ${color}30 0%, transparent 60%)` }}
+      />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 45%, #050505 90%)" }} />
+    </div>
+  );
+}
+
+/* ── Browser-style device frame — holds a video if attached, else the image ── */
+function DeviceFrame({ project }: { project: ShowcaseProject }) {
+  return (
+    <div
+      className="w-full max-w-[560px] rounded-xl overflow-hidden"
+      style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 30px 70px rgba(0,0,0,0.5)" }}
+    >
+      <div className="flex items-center gap-1.5 px-3.5 py-2.5" style={{ background: "#1e1e1e", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <span className="w-2 h-2 rounded-full bg-[#e93e8f]/60" />
+        <span className="w-2 h-2 rounded-full bg-[#c7d300]/60" />
+        <span className="w-2 h-2 rounded-full bg-[#5252A8]/60" />
+      </div>
+      <div className="relative w-full" style={{ aspectRatio: "16/10", background: "#0a0a0a" }}>
+        {project.video ? (
+          <video
+            src={project.video}
+            poster={project.image}
+            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+          />
+        ) : (
+          <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-contain p-8" />
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ── Large featured card — hero-style project showcase ── */
-function FeaturedCard({ image, alt, caption, delay }: BannerCardProps) {
+function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className="group relative overflow-hidden rounded-3xl"
+      style={{
+        background: "#050505",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+        minHeight: 440,
+      }}
+    >
+      <StripedBackdrop color={project.glow} />
+
+      <div className="relative z-10 flex items-center justify-center px-8 pt-12 pb-6 md:px-14">
+        <DeviceFrame project={project} />
+      </div>
+
+      <div className="relative z-10 px-8 pb-8 md:px-14">
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.tags.map((t) => (
+            <span key={t}
+              className="px-3 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-white/60"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+              {t}
+            </span>
+          ))}
+        </div>
+        <p className="text-white/30 text-xs tracking-widest mb-1">{project.year}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-white text-2xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
+            {project.title}
+          </p>
+          <button
+            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+            className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors"
+          >
+            Ver projeto →
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Same card shape as FeaturedCard, but as an open invitation slot ── */
+function PlaceholderCard({ delay }: { delay: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -18,101 +140,49 @@ function FeaturedCard({ image, alt, caption, delay }: BannerCardProps) {
       transition={{ duration: 0.6, delay }}
       className="group relative overflow-hidden rounded-3xl cursor-pointer"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        backdropFilter: "blur(20px)",
+        background: "#050505",
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+        minHeight: 440,
       }}
       onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
     >
-      <div className="flex items-center justify-center p-8 md:p-14" style={{ minHeight: 340 }}>
-        <img
-          src={image}
-          alt={alt}
-          className="max-h-[280px] w-auto object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-      <div className="relative z-10 px-8 pb-6 flex items-center justify-between border-t border-white/6 pt-5">
-        <p className="text-white text-sm tracking-wide"
-          style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-          {caption}
-        </p>
-        <span className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors">Ver projeto →</span>
-      </div>
-    </motion.div>
-  );
-}
+      <StripedBackdrop color="#ffffff" />
 
-function BannerCard({ image, alt, caption, delay }: BannerCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay }}
-      className="flex flex-col items-center gap-4"
-    >
-      <img
-        src={image}
-        alt={alt}
-        className="w-[240px] h-[390px] object-contain drop-shadow-2xl"
-      />
-      <p className="text-white/40 text-xs tracking-[0.2em] uppercase"
-        style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
-        {caption}
-      </p>
-    </motion.div>
-  );
-}
-
-function PlaceholderPill({ delay }: { delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay }}
-      className="flex flex-col items-center cursor-pointer group"
-      onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-    >
-      <div
-        className="flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40 group-hover:bg-white/5"
-        style={{
-          width: 240,
-          height: 390,
-          borderRadius: 120,
-          background: "rgba(255,255,255,0.03)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
-        }}
-      >
-        <span
-          className="text-white/30 text-[10px] tracking-[0.15em] uppercase font-bold text-center px-6 group-hover:text-[#c7d300]/70 transition-colors duration-300"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+      <div className="relative z-10 flex items-center justify-center px-8 pt-12 pb-6 md:px-14">
+        <div
+          className="w-full max-w-[560px] rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40"
+          style={{
+            aspectRatio: "16/10",
+            background: "rgba(255,255,255,0.02)",
+            border: "1.5px dashed rgba(255,255,255,0.15)",
+          }}
         >
-          O SEU PODE SER O PRÓXIMO
-        </span>
+          <span
+            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[#c7d300]/15 group-hover:border-[#c7d300]/40"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}
+          >
+            <span className="text-white/40 text-2xl font-light group-hover:text-[#c7d300]/80 transition-colors duration-300">+</span>
+          </span>
+        </div>
       </div>
-      <div
-        className="relative -mt-[46px] z-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[#c7d300]/20"
-        style={{
-          width: 92,
-          height: 92,
-          background: "rgba(255,255,255,0.05)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.10)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
-        }}
-      >
-        <span className="text-white/25 text-3xl font-light group-hover:text-[#c7d300]/60 transition-colors duration-300">+</span>
+
+      <div className="relative z-10 px-8 pb-8 md:px-14">
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span
+            className="px-3 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-white/40"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            O seu projeto aqui
+          </span>
+        </div>
+        <p className="text-white/30 text-xs tracking-widest mb-1">EM BREVE</p>
+        <div className="flex items-center justify-between">
+          <p className="text-white/60 text-2xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
+            Próximo projeto
+          </p>
+          <span className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors">Fale com a gente →</span>
+        </div>
       </div>
-      <p className="mt-4 text-white/20 text-xs tracking-[0.2em] uppercase"
-        style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
-        Próximo projeto
-      </p>
     </motion.div>
   );
 }
@@ -158,16 +228,12 @@ export function ProjetosSection() {
           </ScrollFloat>
         </div>
 
-        {/* Featured — 2 large cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <FeaturedCard image="/BANNERHELP.png" alt="HelpSmart" caption="HelpSmart" delay={0.1} />
-          <FeaturedCard image="/BANNERPOINTERSPORT.png" alt="Pointer Sports" caption="Pointer Sports" delay={0.2} />
-        </div>
-
-        {/* Grid — remaining projects */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
-          <BannerCard image="/BANNERSOARTS.png" alt="This Is Soarts Films" caption="Soarts Films" delay={0.3} />
-          <PlaceholderPill delay={0.4} />
+        {/* Featured — large cards, each with a video/screenshot slot */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {projects.map((p, i) => (
+            <FeaturedCard key={p.title} project={p} delay={i * 0.1} />
+          ))}
+          <PlaceholderCard delay={projects.length * 0.1} />
         </div>
 
         {/* CTA — glass button */}
