@@ -24,7 +24,7 @@ const projects: ShowcaseProject[] = [
     title: "Soarts Films",
     year: "2026",
     tags: ["Branding", "Social", "Vídeo"],
-    image: "/BANNERSOARTS.png",
+    image: "",
     video: "",
     glow: "#e93e8f",
   },
@@ -49,39 +49,38 @@ function StripedBackdrop({ color }: { color: string }) {
   );
 }
 
-/* ── Browser-style device frame — holds a video if attached, else the image ── */
-function DeviceFrame({ project }: { project: ShowcaseProject }) {
+/* ── Full-bleed media — fills the whole card, cropping is fine ── */
+function CardMedia({ project }: { project: ShowcaseProject }) {
+  if (project.video) {
+    return (
+      <video
+        src={project.video}
+        poster={project.image}
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+    );
+  }
+
+  if (project.image) {
+    return <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />;
+  }
+
   return (
-    <div
-      className="w-full max-w-[560px] rounded-xl overflow-hidden"
-      style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 30px 70px rgba(0,0,0,0.5)" }}
-    >
-      <div className="flex items-center gap-1.5 px-3.5 py-2.5" style={{ background: "#1e1e1e", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <span className="w-2 h-2 rounded-full bg-[#e93e8f]/60" />
-        <span className="w-2 h-2 rounded-full bg-[#c7d300]/60" />
-        <span className="w-2 h-2 rounded-full bg-[#5252A8]/60" />
-      </div>
-      <div className="relative w-full" style={{ aspectRatio: "16/10", background: "#0a0a0a" }}>
-        {project.video ? (
-          <video
-            src={project.video}
-            poster={project.image}
-            className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            controls
-          />
-        ) : (
-          <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-contain p-8" />
-        )}
-      </div>
+    <div className="absolute inset-0 flex items-center justify-center">
+      <StripedBackdrop color={project.glow} />
+      <p className="relative z-10 text-white/25 text-sm tracking-[0.3em] uppercase"
+        style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
+        {project.title} em breve
+      </p>
     </div>
   );
 }
 
-/* ── Large featured card — hero-style project showcase ── */
+/* ── Wide banner card — media fills the card edge-to-edge, text overlaid bottom-left ── */
 function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: number }) {
   return (
     <motion.div
@@ -91,36 +90,35 @@ function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: num
       transition={{ duration: 0.6, delay }}
       className="group relative overflow-hidden rounded-3xl"
       style={{
-        background: "#050505",
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
-        minHeight: 440,
+        minHeight: 540,
       }}
     >
-      <StripedBackdrop color={project.glow} />
+      <CardMedia project={project} />
+      <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none"
+        style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.92) 100%)" }} />
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, ${project.glow}20 0%, transparent 45%)` }} />
 
-      <div className="relative z-10 flex items-center justify-center px-8 pt-12 pb-6 md:px-14">
-        <DeviceFrame project={project} />
-      </div>
-
-      <div className="relative z-10 px-8 pb-8 md:px-14">
+      <div className="relative z-10 p-6 pt-40 md:p-10 md:pt-0 h-full flex flex-col justify-end" style={{ minHeight: 540 }}>
         <div className="flex flex-wrap gap-2 mb-4">
           {project.tags.map((t) => (
             <span key={t}
-              className="px-3 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-white/60"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+              className="px-3 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-white/70"
+              style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
               {t}
             </span>
           ))}
         </div>
-        <p className="text-white/30 text-xs tracking-widest mb-1">{project.year}</p>
-        <div className="flex items-center justify-between">
+        <p className="text-white/40 text-xs tracking-widest mb-1">{project.year}</p>
+        <div className="flex items-center gap-6">
           <p className="text-white text-2xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
             {project.title}
           </p>
           <button
             onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-            className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors"
+            className="text-white/50 text-xs group-hover:text-[#c7d300] transition-colors"
           >
             Ver projeto →
           </button>
@@ -143,17 +141,16 @@ function PlaceholderCard({ delay }: { delay: number }) {
         background: "#050505",
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
-        minHeight: 440,
+        minHeight: 540,
       }}
       onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
     >
       <StripedBackdrop color="#ffffff" />
 
-      <div className="relative z-10 flex items-center justify-center px-8 pt-12 pb-6 md:px-14">
+      <div className="absolute inset-6 md:inset-8 flex items-center justify-center">
         <div
-          className="w-full max-w-[560px] rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40"
+          className="w-full h-full rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:border-[#c7d300]/40"
           style={{
-            aspectRatio: "16/10",
             background: "rgba(255,255,255,0.02)",
             border: "1.5px dashed rgba(255,255,255,0.15)",
           }}
@@ -167,16 +164,18 @@ function PlaceholderCard({ delay }: { delay: number }) {
         </div>
       </div>
 
-      <div className="relative z-10 px-8 pb-8 md:px-14">
+      <div className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
+        style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%)" }} />
+      <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-10" style={{ minHeight: 540 }}>
         <div className="flex flex-wrap gap-2 mb-4">
           <span
             className="px-3 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-white/40"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
             O seu projeto aqui
           </span>
         </div>
         <p className="text-white/30 text-xs tracking-widest mb-1">EM BREVE</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-6">
           <p className="text-white/60 text-2xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
             Próximo projeto
           </p>
@@ -229,7 +228,7 @@ export function ProjetosSection() {
         </div>
 
         {/* Featured — large cards, each with a video/screenshot slot */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-6">
           {projects.map((p, i) => (
             <FeaturedCard key={p.title} project={p} delay={i * 0.1} />
           ))}
