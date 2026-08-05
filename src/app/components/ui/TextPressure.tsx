@@ -79,6 +79,22 @@ export default function TextPressure({
 
   const chars = text.split("");
 
+  // Load the variable font via a real <link> in <head> instead of a CSS
+  // @import nested in a dynamically-rendered <style> tag — the latter gets
+  // silently blocked or deprioritized by several browsers (e.g. Opera GX's
+  // built-in blocker), which leaves the pressure effect running with no
+  // visible result since the fallback font doesn't support the axes.
+  useEffect(() => {
+    const existing = document.querySelector<HTMLLinkElement>(`link[data-text-pressure-font="${fontUrl}"]`);
+    if (existing) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = fontUrl;
+    link.setAttribute("data-text-pressure-font", fontUrl);
+    document.head.appendChild(link);
+  }, [fontUrl]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current.x = e.clientX;
@@ -185,8 +201,6 @@ export default function TextPressure({
   const styleElement = useMemo(() => {
     return (
       <style>{`
-        @import url('${fontUrl}');
-
         .text-pressure-flex {
           display: flex;
           justify-content: space-between;
@@ -212,7 +226,7 @@ export default function TextPressure({
         }
       `}</style>
     );
-  }, [fontUrl, textColor, strokeColor]);
+  }, [textColor, strokeColor]);
 
   const dynamicClassName = [className, flex ? "text-pressure-flex" : "", stroke ? "text-pressure-stroke" : ""]
     .filter(Boolean)
