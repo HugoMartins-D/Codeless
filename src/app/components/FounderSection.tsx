@@ -26,7 +26,7 @@ function ToolBadge({ tool }: { tool: typeof tools[0] }) {
 
 export function FounderSection() {
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section id="ceo" className="py-28 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

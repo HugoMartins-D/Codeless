@@ -9,7 +9,7 @@ const services = [
 
 export function ServicesGridSection() {
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section id="servicos" className="py-28 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}

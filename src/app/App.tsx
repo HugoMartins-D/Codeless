@@ -16,7 +16,11 @@ import { WebGLShader } from "./components/ui/web-gl-shader";
 const menuItems = [
   { label: "Home", ariaLabel: "Ir para o início", link: "#home" },
   { label: "Projetos", ariaLabel: "Ver projetos", link: "#projetos" },
-  { label: "Code Less", ariaLabel: "Sobre a Code Less", link: "#codeless" },
+  { label: "Serviços", ariaLabel: "Ver o que fazemos", link: "#servicos" },
+  { label: "Diferenciais", ariaLabel: "O que nos torna diferentes", link: "#diferenciais" },
+  { label: "Quem somos", ariaLabel: "Conhecer a Code Less", link: "#quem-somos" },
+  { label: "CEO", ariaLabel: "Conhecer o fundador", link: "#ceo" },
+  { label: "FAQ", ariaLabel: "Perguntas frequentes", link: "#faq" },
   { label: "Contato", ariaLabel: "Falar com a equipe", link: "#contato" },
 ];
 

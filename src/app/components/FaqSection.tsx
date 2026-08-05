@@ -31,7 +31,7 @@ const faqs = [
 
 export function FaqSection() {
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section id="faq" className="py-28 relative overflow-hidden">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
