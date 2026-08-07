@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 
 const items = [
   {
@@ -209,7 +210,7 @@ export function FeaturesSection() {
             </p>
             <button
               onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-              className="self-start px-7 py-3.5 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
+              className="self-start inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
                 fontWeight: 700,
@@ -218,7 +219,7 @@ export function FeaturesSection() {
                 boxShadow: "0 4px 24px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.6)",
               }}
             >
-              Seja atendido →
+              Seja atendido <ArrowRight size={16} strokeWidth={2.5} />
             </button>
           </motion.div>
         </div>

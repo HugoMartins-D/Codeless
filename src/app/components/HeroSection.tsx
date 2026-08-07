@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowDownRight } from "lucide-react";
 import TextPressure from "./ui/TextPressure";
 
 /* ── Wavy line-art background ────────────────────────────────────── */
@@ -116,19 +117,19 @@ export function HeroSection() {
         >
           <button
             onClick={() => document.querySelector("#projetos")?.scrollIntoView({ behavior: "smooth" })}
-            className="px-7 py-3.5 rounded-full text-black text-sm tracking-wide
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-black text-sm tracking-wide
                        hover:scale-105 active:scale-95 transition-transform"
             style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, background: "#c7d300" }}
           >
-            Ver projetos ↘
+            Ver projetos <ArrowDownRight size={16} strokeWidth={2.5} />
           </button>
           <button
             onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-            className="px-7 py-3.5 rounded-full border border-white/15 text-white/70 text-sm tracking-wide
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-white/15 text-white/70 text-sm tracking-wide
                        hover:border-white/30 hover:text-white transition-all"
             style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 500 }}
           >
-            Falar com a equipe ↘
+            Falar com a equipe <ArrowDownRight size={16} strokeWidth={2.5} />
           </button>
         </motion.div>
 

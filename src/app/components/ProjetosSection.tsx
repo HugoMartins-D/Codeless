@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import ScrollFloat from "./ui/ScrollFloat";
 
 interface ShowcaseProject {
@@ -118,9 +119,9 @@ function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: num
           </p>
           <button
             onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-            className="text-white/50 text-xs group-hover:text-[#c7d300] transition-colors"
+            className="inline-flex items-center gap-1.5 text-white/50 text-xs group-hover:text-[#c7d300] transition-colors"
           >
-            Ver projeto →
+            Ver projeto <ArrowRight size={14} strokeWidth={2.5} />
           </button>
         </div>
       </div>
@@ -179,7 +180,9 @@ function PlaceholderCard({ delay }: { delay: number }) {
           <p className="text-white/60 text-2xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
             Próximo projeto
           </p>
-          <span className="text-white/25 text-xs group-hover:text-[#c7d300] transition-colors">Fale com a gente →</span>
+          <span className="inline-flex items-center gap-1.5 text-white/25 text-xs group-hover:text-[#c7d300] transition-colors">
+            Fale com a gente <ArrowRight size={14} strokeWidth={2.5} />
+          </span>
         </div>
       </div>
     </motion.div>

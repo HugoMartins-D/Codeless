@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 
 export function ProofSection() {
   return (
@@ -74,14 +75,14 @@ export function ProofSection() {
           {/* CTA */}
           <button
             onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-            className="px-8 py-4 rounded-full text-black text-sm font-bold tracking-widest uppercase transition-all hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-black text-sm font-bold tracking-widest uppercase transition-all hover:scale-105 active:scale-95"
             style={{
               fontFamily: "'Montserrat', sans-serif",
               background: "#c7d300",
               boxShadow: "0 8px 32px rgba(199,211,0,0.30)",
             }}
           >
-            Quero um site assim →
+            Quero um site assim <ArrowRight size={16} strokeWidth={2.5} />
           </button>
         </motion.div>
       </div>

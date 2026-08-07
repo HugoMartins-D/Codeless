@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 
 const steps = [
   { n: "01", t: "Briefing",          d: "Entendemos sua empresa, público e objetivos",      color: "#5252A8" },
@@ -119,7 +120,7 @@ export function AboutSection() {
 
                 <button
                   onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
-                  className="px-7 py-3.5 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontWeight: 700,
@@ -128,7 +129,7 @@ export function AboutSection() {
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.50), 0 8px 24px rgba(199,211,0,0.20)",
                   }}
                 >
-                  Quero meu site →
+                  Quero meu site <ArrowRight size={16} strokeWidth={2.5} />
                 </button>
               </div>
 
@@ -163,7 +164,7 @@ export function AboutSection() {
                       <p className="text-white/35 text-xs"
                         style={{ fontFamily: "'Montserrat', sans-serif" }}>{s.d}</p>
                     </div>
-                    <span className="text-white/15 text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0">→</span>
+                    <ArrowRight className="text-white/15 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" size={14} />
                   </motion.div>
                 ))}
               </div>

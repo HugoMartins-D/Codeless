@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import { LogoMarkGhost } from "./Logo";
 
 export function CtaSection() {
@@ -87,7 +88,7 @@ export function CtaSection() {
             {/* Secondary — transparent glass */}
             <button
               onClick={() => document.querySelector("#projetos")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-8 py-4 rounded-full text-white/60 text-sm transition-all hover:scale-105 hover:text-white"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white/60 text-sm transition-all hover:scale-105 hover:text-white"
               style={{
                 fontFamily: "'Montserrat', sans-serif", fontWeight: 500,
                 background: "rgba(255,255,255,0.04)",
@@ -95,7 +96,7 @@ export function CtaSection() {
                 border: "1px solid rgba(255,255,255,0.10)",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
               }}>
-              Ver projetos →
+              Ver projetos <ArrowRight size={16} strokeWidth={2.5} />
             </button>
           </div>
         </motion.div>
