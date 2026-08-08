@@ -25,8 +25,8 @@ const projects: ShowcaseProject[] = [
     title: "Soarts Films",
     year: "2026",
     tags: ["Site institucional", "Portifolio", "Sistema Interno", "Automação"],
-    image: "",
-    video: "",
+    image: "/BANNERSOARTS.png",
+    video: "/soarts.mp4",
     glow: "#e93e8f",
   },
 ];
