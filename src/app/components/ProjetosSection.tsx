@@ -9,6 +9,8 @@ interface ShowcaseProject {
   image: string;
   /** Caminho de um .mp4/.webm em /public. Se vazio, mostra a imagem. */
   video?: string;
+  /** Site do projeto. Se vazio, "Ver projeto" abre o WhatsApp. */
+  link?: string;
   glow: string;
 }
 
@@ -27,6 +29,7 @@ const projects: ShowcaseProject[] = [
     tags: ["Site institucional", "Portifolio", "Sistema Interno", "Automação"],
     image: "/BANNERSOARTS.png",
     video: "/soarts.mp4",
+    link: "https://www.soartsfilms.com.br/",
     glow: "#e93e8f",
   },
 ];
@@ -118,7 +121,7 @@ function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: num
             {project.title}
           </p>
           <button
-            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+            onClick={() => window.open(project.link || "https://wa.me/5547996258977", "_blank")}
             className="inline-flex items-center gap-1.5 text-white/50 text-xs group-hover:text-[#c7d300] transition-colors"
           >
             Ver projeto <ArrowRight size={14} strokeWidth={2.5} />
