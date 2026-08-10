@@ -5,7 +5,7 @@ import TextPressure from "./ui/TextPressure";
 /* ── Wavy line-art background ────────────────────────────────────── */
 function WavyBackground() {
   const rows = [
-    { y: 60,  opacity: 0.10, dur: 22 },
+    { y: 60, opacity: 0.10, dur: 22 },
     { y: 110, opacity: 0.16, dur: 26 },
     { y: 160, opacity: 0.22, dur: 19 },
     { y: 210, opacity: 0.14, dur: 24 },
@@ -106,7 +106,7 @@ export function HeroSection() {
           className="text-white/45 text-base leading-relaxed mt-8 mb-10 max-w-xl mx-auto"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          Sites, landing pages e e-commerces sob medida — para marcas que
+          Sites, landing pages e e-commerces sob medida para marcas que
           levam a sério a primeira impressão digital.
         </motion.p>
 
