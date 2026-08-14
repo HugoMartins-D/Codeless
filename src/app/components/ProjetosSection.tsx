@@ -32,6 +32,13 @@ const projects: ShowcaseProject[] = [
     link: "https://www.soartsfilms.com.br/",
     glow: "#e93e8f",
   },
+  {
+    title: "Dra. Helena Cristina Martins",
+    year: "2026",
+    tags: ["Landing Page", "Em breve"],
+    image: "",
+    glow: "#4fd1c5",
+  },
 ];
 
 /* ── Diagonal stripe texture — brand-colored glow bleeding into the dark ── */
