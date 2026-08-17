@@ -7,51 +7,26 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
+import type { ComponentType } from "react";
+import { FinanceiroPage } from "./modules/FinanceiroPage";
+import { ContratosPage } from "./modules/ContratosPage";
+import { DemandasPage } from "./modules/DemandasPage";
+import { ClientesPage } from "./modules/ClientesPage";
+import { DashboardPage } from "./modules/DashboardPage";
+import { AcessosPage } from "./modules/AcessosPage";
 
 export interface AdminModule {
   slug: string;
   title: string;
-  description: string;
   icon: LucideIcon;
+  component: ComponentType;
 }
 
 export const adminModules: AdminModule[] = [
-  {
-    slug: "financeiro",
-    title: "Financeiro",
-    description:
-      "Lucro, entradas e saídas do mês, saldo em caixa, fluxo de caixa dos últimos 6 meses, meta editável e notas fiscais pendentes.",
-    icon: Wallet,
-  },
-  {
-    slug: "contratos",
-    title: "Contratos",
-    description:
-      "Geração automática de contrato a partir de um template, com status de rascunho, enviado e assinado.",
-    icon: FileText,
-  },
-  {
-    slug: "demandas",
-    title: "Demandas",
-    description: "Lista e kanban de demandas organizados por cliente.",
-    icon: KanbanSquare,
-  },
-  {
-    slug: "clientes",
-    title: "Clientes",
-    description: "CRM com base de clientes segmentada por status: ativo, pausado, prospect, ex-cliente.",
-    icon: Users,
-  },
-  {
-    slug: "dashboard",
-    title: "Dashboard geral",
-    description: "Visão consolidada de próximas entregas, carga por colaborador e resumo financeiro do mês.",
-    icon: LayoutDashboard,
-  },
-  {
-    slug: "acessos",
-    title: "Acessos",
-    description: "Permissões por colaborador: quais abas e quais clientes cada pessoa do time pode ver.",
-    icon: ShieldCheck,
-  },
+  { slug: "financeiro", title: "Financeiro", icon: Wallet, component: FinanceiroPage },
+  { slug: "contratos", title: "Contratos", icon: FileText, component: ContratosPage },
+  { slug: "demandas", title: "Demandas", icon: KanbanSquare, component: DemandasPage },
+  { slug: "clientes", title: "Clientes", icon: Users, component: ClientesPage },
+  { slug: "dashboard", title: "Dashboard geral", icon: LayoutDashboard, component: DashboardPage },
+  { slug: "acessos", title: "Acessos", icon: ShieldCheck, component: AcessosPage },
 ];
