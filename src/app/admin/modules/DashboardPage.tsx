@@ -1,0 +1,92 @@
+import { useMemo } from "react";
+import { useLocalStorage } from "../lib/storage";
+import { computeFinanceSummary } from "../lib/finance";
+import type { Task, Transaction } from "../types";
+import { Panel, Badge, StatCard } from "../ui/primitives";
+import { ACCENT, currency, headingFont } from "../ui/tokens";
+
+const statusTone = { todo: "neutral", doing: "warn", done: "accent" } as const;
+const statusLabel = { todo: "A fazer", doing: "Em andamento", done: "Concluído" } as const;
+
+export function DashboardPage() {
+  const [tasks] = useLocalStorage<Task[]>("admin_demandas_list", []);
+  const [transactions] = useLocalStorage<Transaction[]>("admin_financeiro_transactions", []);
+
+  const summary = useMemo(() => computeFinanceSummary(transactions), [transactions]);
+
+  const upcoming = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.status !== "done")
+        .sort((a, b) => (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999"))
+        .slice(0, 8),
+    [tasks],
+  );
+
+  const byAssignee = useMemo(() => {
+    const map = new Map<string, number>();
+    tasks
+      .filter((t) => t.status !== "done")
+      .forEach((t) => {
+        const key = t.assignee || "Sem responsável";
+        map.set(key, (map.get(key) ?? 0) + 1);
+      });
+    const entries = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    const max = entries[0]?.[1] ?? 1;
+    return { entries, max };
+  }, [tasks]);
+
+  return (
+    <div className="max-w-5xl">
+      <h1 className="text-white text-2xl mb-6" style={headingFont}>
+        Dashboard geral
+      </h1>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard label="Lucro do mês" value={currency(summary.lucroMes)} />
+        <StatCard label="Receitas do mês" value={currency(summary.totalReceitasMes)} />
+        <StatCard label="Despesas do mês" value={currency(summary.totalDespesasMes)} />
+        <StatCard label="Saldo em caixa" value={currency(summary.saldoEmCaixa)} />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <Panel>
+          <p className="text-white/50 text-[11px] tracking-widest uppercase mb-4">Próximas entregas</p>
+          {upcoming.length === 0 && <p className="text-white/30 text-sm">Nada pendente por aqui.</p>}
+          <div className="flex flex-col gap-2">
+            {upcoming.map((t) => (
+              <div key={t.id} className="flex items-center justify-between gap-2 text-sm">
+                <div className="min-w-0">
+                  <p className="text-white/70 truncate">{t.title}</p>
+                  <p className="text-white/30 text-xs truncate">{t.client || "Sem cliente"}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {t.dueDate && <span className="text-white/40 text-xs">{t.dueDate}</span>}
+                  <Badge tone={statusTone[t.status]}>{statusLabel[t.status]}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel>
+          <p className="text-white/50 text-[11px] tracking-widest uppercase mb-4">Carga por colaborador</p>
+          {byAssignee.entries.length === 0 && <p className="text-white/30 text-sm">Nenhuma demanda em aberto.</p>}
+          <div className="flex flex-col gap-3">
+            {byAssignee.entries.map(([name, count]) => (
+              <div key={name}>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-white/60">{name}</span>
+                  <span className="text-white/40">{count}</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div className="h-full rounded-full" style={{ width: `${(count / byAssignee.max) * 100}%`, background: ACCENT }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
+}
