@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { useLocalStorage, uid } from "../lib/storage";
+import { uid } from "../lib/storage";
+import { useSupabaseTable } from "../lib/supabaseData";
+import { fromCollaboratorRow, toCollaboratorRow, fromClientRow, toClientRow } from "../lib/mappers";
 import type { Client, Collaborator } from "../types";
 import { adminModules } from "../modules";
 import { Panel, Field, TextInput, Button } from "../ui/primitives";
@@ -10,8 +12,8 @@ import { headingFont } from "../ui/tokens";
 const emptyForm = { name: "", email: "" };
 
 export function AcessosPage() {
-  const [collaborators, setCollaborators] = useLocalStorage<Collaborator[]>("admin_acessos_colaboradores", []);
-  const [clients] = useLocalStorage<Client[]>("admin_clientes_list", []);
+  const [collaborators, setCollaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
+  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);

@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { Plus, Trash2, X as XIcon, FileCheck2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { useLocalStorage, uid } from "../lib/storage";
+import { uid } from "../lib/storage";
+import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
+import { fromTransactionRow, toTransactionRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
 import type { Transaction, TransactionType } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
@@ -23,9 +25,9 @@ const emptyForm = {
 };
 
 export function FinanceiroPage() {
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>("admin_financeiro_transactions", []);
-  const [categories, setCategories] = useLocalStorage("admin_financeiro_categories", DEFAULT_CATEGORIES);
-  const [goal, setGoal] = useLocalStorage("admin_financeiro_goal", 50000);
+  const [transactions, setTransactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
+  const [categories, setCategories] = useSupabaseSetting("financeiro_categories", DEFAULT_CATEGORIES);
+  const [goal, setGoal] = useSupabaseSetting("financeiro_goal", 50000);
   const [goalDraft, setGoalDraft] = useState<string | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
