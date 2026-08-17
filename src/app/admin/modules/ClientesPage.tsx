@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { useLocalStorage, uid } from "../lib/storage";
+import { uid } from "../lib/storage";
+import { useSupabaseTable } from "../lib/supabaseData";
+import { fromClientRow, toClientRow } from "../lib/mappers";
 import { parseSimpleCsv } from "../lib/csv";
 import type { Client, ClientStatus } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge } from "../ui/primitives";
@@ -19,7 +21,7 @@ const statusTone: Record<ClientStatus, "accent" | "warn" | "neutral" | "danger">
 const emptyForm = { name: "", contact: "", status: "prospect" as ClientStatus, recurringValue: "" };
 
 export function ClientesPage() {
-  const [clients, setClients] = useLocalStorage<Client[]>("admin_clientes_list", []);
+  const [clients, setClients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
   const [filter, setFilter] = useState<ClientStatus | "todos">("todos");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);

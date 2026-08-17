@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { useLocalStorage } from "../lib/storage";
+import { useSupabaseTable } from "../lib/supabaseData";
+import { fromTaskRow, toTaskRow, fromTransactionRow, toTransactionRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
 import type { Task, Transaction } from "../types";
 import { Panel, Badge, StatCard } from "../ui/primitives";
@@ -9,8 +10,8 @@ const statusTone = { todo: "neutral", doing: "warn", done: "accent" } as const;
 const statusLabel = { todo: "A fazer", doing: "Em andamento", done: "Concluído" } as const;
 
 export function DashboardPage() {
-  const [tasks] = useLocalStorage<Task[]>("admin_demandas_list", []);
-  const [transactions] = useLocalStorage<Transaction[]>("admin_financeiro_transactions", []);
+  const [tasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
+  const [transactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
 
   const summary = useMemo(() => computeFinanceSummary(transactions), [transactions]);
 

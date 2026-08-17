@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Plus, Trash2, Copy, Download } from "lucide-react";
-import { useLocalStorage, uid } from "../lib/storage";
+import { uid } from "../lib/storage";
+import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
+import { fromContractRow, toContractRow } from "../lib/mappers";
 import { DEFAULT_TEMPLATE, generateContractText, downloadTextFile } from "../lib/contract";
 import type { Contract, ContractStatus, PaymentMethod } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
@@ -25,8 +27,8 @@ const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
 };
 
 export function ContratosPage() {
-  const [contracts, setContracts] = useLocalStorage<Contract[]>("admin_contratos_list", []);
-  const [template, setTemplate] = useLocalStorage("admin_contratos_template", DEFAULT_TEMPLATE);
+  const [contracts, setContracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const [template, setTemplate] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
 
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);

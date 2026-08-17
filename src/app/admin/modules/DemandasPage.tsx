@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Plus, Trash2, ArrowRight, ArrowLeft, List, KanbanSquare } from "lucide-react";
 import { useLocalStorage, uid } from "../lib/storage";
+import { useSupabaseTable } from "../lib/supabaseData";
+import { fromTaskRow, toTaskRow, fromClientRow, toClientRow } from "../lib/mappers";
 import type { Client, Task, TaskStatus } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
@@ -21,8 +23,8 @@ const statusTone: Record<TaskStatus, "neutral" | "warn" | "accent"> = {
 const emptyForm = { title: "", client: "", assignee: "", dueDate: "", status: "todo" as TaskStatus };
 
 export function DemandasPage() {
-  const [tasks, setTasks] = useLocalStorage<Task[]>("admin_demandas_list", []);
-  const [clients] = useLocalStorage<Client[]>("admin_clientes_list", []);
+  const [tasks, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
+  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
   const [view, setView] = useLocalStorage<"lista" | "kanban">("admin_demandas_view", "lista");
 
   const [modalOpen, setModalOpen] = useState(false);
