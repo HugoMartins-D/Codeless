@@ -16,6 +16,23 @@ export function currency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+/**
+ * Converte texto digitado em número, aceitando tanto "1500.00" quanto o
+ * formato brasileiro "1.500,00" (ponto de milhar + vírgula decimal).
+ * Sem isso, "1.500,00" virava NaN (só a primeira vírgula era trocada).
+ */
+export function parseDecimal(value: string): number {
+  const v = value.trim();
+  if (!v) return 0;
+  if (v.includes(",") && v.includes(".")) {
+    return Number(v.replace(/\./g, "").replace(",", ".")) || 0;
+  }
+  if (v.includes(",")) {
+    return Number(v.replace(",", ".")) || 0;
+  }
+  return Number(v) || 0;
+}
+
 export function monthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }

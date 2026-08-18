@@ -5,7 +5,7 @@ import { generateContractText, downloadTextFile } from "../lib/contract";
 import { renderContractBlocks } from "../lib/contractFormat";
 import type { Client, Contract, ContractSignatory } from "../types";
 import { Field, TextInput, SelectInput, TextArea, Button } from "../ui/primitives";
-import { headingFont } from "../ui/tokens";
+import { headingFont, parseDecimal } from "../ui/tokens";
 
 function formFromContract(c: Contract | null) {
   return {
@@ -75,8 +75,8 @@ export function ContractEditor({
   }
 
   const draft: Contract = useMemo(() => {
-    const implementationValue = Number(form.implementationValue.replace(",", ".")) || 0;
-    const monthlyValue = Number(form.monthlyValue.replace(",", ".")) || 0;
+    const implementationValue = parseDecimal(form.implementationValue);
+    const monthlyValue = parseDecimal(form.monthlyValue);
     return {
       id: initial?.id ?? "draft",
       clientCompanyName: form.clientCompanyName || "—",
@@ -98,8 +98,18 @@ export function ContractEditor({
 
   const previewText = useMemo(() => generateContractText(template, draft), [template, draft]);
 
+  const [saveAttempted, setSaveAttempted] = useState(false);
+  const validationErrors = useMemo(() => {
+    const errs: string[] = [];
+    if (!form.clientCompanyName.trim()) errs.push("Nome da empresa");
+    if (!draft.implementationValue) errs.push("Valor de implantação");
+    if (draft.signatories.length === 0) errs.push("Pelo menos um responsável pra assinar");
+    return errs;
+  }, [form.clientCompanyName, draft.implementationValue, draft.signatories]);
+
   function handleSave() {
-    if (!form.clientCompanyName || !draft.implementationValue || draft.signatories.length === 0) return;
+    setSaveAttempted(true);
+    if (validationErrors.length > 0) return;
     onSave({ ...draft, id: initial?.id ?? uid() });
   }
 
@@ -281,13 +291,18 @@ export function ContractEditor({
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-3 px-6 py-4 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        <Button onClick={handleDownload} className="inline-flex items-center gap-1.5">
-          <Download size={14} /> Só baixar
-        </Button>
-        <Button variant="primary" onClick={handleSave} className="inline-flex items-center gap-1.5">
-          <Save size={14} /> {initial ? "Salvar alterações" : "Gerar e salvar"}
-        </Button>
+      <div className="flex items-center justify-between gap-3 px-6 py-4 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <p className="text-[#e93e8f] text-xs">
+          {saveAttempted && validationErrors.length > 0 && `Preencha antes de salvar: ${validationErrors.join(", ")}`}
+        </p>
+        <div className="flex items-center gap-3">
+          <Button onClick={handleDownload} className="inline-flex items-center gap-1.5">
+            <Download size={14} /> Só baixar
+          </Button>
+          <Button variant="primary" onClick={handleSave} className="inline-flex items-center gap-1.5">
+            <Save size={14} /> {initial ? "Salvar alterações" : "Gerar e salvar"}
+          </Button>
+        </div>
       </div>
     </div>
   );
