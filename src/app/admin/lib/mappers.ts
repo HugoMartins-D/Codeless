@@ -74,18 +74,22 @@ export const fromTaskRow = (r: any): Task => ({
   id: r.id,
   title: r.title,
   client: r.client ?? "",
+  description: r.description ?? "",
   assignee: r.assignee ?? undefined,
   dueDate: r.due_date ?? undefined,
   status: r.status,
+  deliverableUrl: r.deliverable_url ?? undefined,
 });
 
 export const toTaskRow = (t: Task) => ({
   id: t.id,
   title: t.title,
   client: t.client,
+  description: t.description ?? "",
   assignee: t.assignee || null,
   due_date: t.dueDate || null,
   status: t.status,
+  deliverable_url: t.deliverableUrl || null,
 });
 
 export const fromCollaboratorRow = (r: any): Collaborator => ({
