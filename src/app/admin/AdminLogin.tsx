@@ -1,23 +1,44 @@
 import { useState, type FormEvent } from "react";
 import { Lock } from "lucide-react";
-import { signIn } from "./auth";
+import { signIn, signUp } from "./auth";
 
 export function AdminLogin() {
+  const [mode, setMode] = useState<"entrar" | "criar">("entrar");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const message = await signIn(email, password);
-    setLoading(false);
-    if (message) {
-      setError("E-mail ou senha incorretos.");
-      setPassword("");
+    setInfo(null);
+
+    if (mode === "entrar") {
+      const message = await signIn(email, password);
+      setLoading(false);
+      if (message) {
+        setError("E-mail ou senha incorretos.");
+        setPassword("");
+      }
+      // login bem-sucedido: onAuthChange no AdminApp cuida da transição de tela
+      return;
     }
-    // login bem-sucedido: onAuthChange no AdminApp cuida da transição de tela
+
+    const result = await signUp(email, password);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.needsConfirmation) {
+      setInfo("Conta criada. Confirme seu e-mail para poder entrar.");
+      setMode("entrar");
+      setPassword("");
+      return;
+    }
+    setInfo("Conta criada. Aguarde a liberação de acesso pelo administrador.");
   }
 
   return (
@@ -43,7 +64,9 @@ export function AdminLogin() {
         >
           Painel interno
         </h1>
-        <p className="text-white/40 text-sm mb-6">Acesso restrito. Entre com sua conta para continuar.</p>
+        <p className="text-white/40 text-sm mb-6">
+          {mode === "entrar" ? "Acesso restrito. Entre com sua conta para continuar." : "Crie sua conta. O acesso às abas é liberado pelo administrador."}
+        </p>
 
         <input
           type="email"
@@ -63,7 +86,7 @@ export function AdminLogin() {
         />
         <input
           type="password"
-          autoComplete="current-password"
+          autoComplete={mode === "entrar" ? "current-password" : "new-password"}
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
@@ -77,6 +100,7 @@ export function AdminLogin() {
           }}
         />
         {error && <p className="text-[#e93e8f] text-xs mb-4">{error}</p>}
+        {info && <p className="text-[#c7d300] text-xs mb-4">{info}</p>}
 
         <button
           type="submit"
@@ -90,7 +114,19 @@ export function AdminLogin() {
             color: "#c7d300",
           }}
         >
-          {loading ? "ENTRANDO..." : "ENTRAR"}
+          {loading ? "..." : mode === "entrar" ? "ENTRAR" : "CRIAR CONTA"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMode(mode === "entrar" ? "criar" : "entrar");
+            setError(null);
+            setInfo(null);
+          }}
+          className="w-full mt-3 text-center text-xs text-white/30 hover:text-white/60 transition-colors"
+        >
+          {mode === "entrar" ? "Não tem conta? Criar conta" : "Já tem conta? Entrar"}
         </button>
       </form>
     </div>

@@ -1,20 +1,16 @@
-import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router";
-import type { Session } from "@supabase/supabase-js";
 import { AdminLogin } from "./AdminLogin";
 import { AdminLayout } from "./AdminLayout";
+import { AdminPending } from "./AdminPending";
 import { adminModules } from "./modules";
-import { getSession, onAuthChange } from "./auth";
+import { useSession } from "./auth";
+import { useMyAccess, hasAccess } from "./lib/access";
 
 export default function AdminApp() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const session = useSession();
+  const access = useMyAccess(session ?? null);
 
-  useEffect(() => {
-    getSession().then(setSession);
-    return onAuthChange(setSession);
-  }, []);
-
-  if (session === undefined) {
+  if (session === undefined || access.loading) {
     return null;
   }
 
@@ -22,15 +18,25 @@ export default function AdminApp() {
     return <AdminLogin />;
   }
 
+  if (!access.isAdmin && access.moduleAccess.length === 0) {
+    return <AdminPending email={session.user.email ?? ""} />;
+  }
+
+  const visibleModules = adminModules.filter((m) => {
+    if (m.slug === "geral") return true;
+    if (m.slug === "acessos") return access.isAdmin;
+    return hasAccess(access, m.slug);
+  });
+
   return (
     <Routes>
-      <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to={adminModules[0].slug} replace />} />
-        {adminModules.map((m) => {
+      <Route element={<AdminLayout modules={visibleModules} />}>
+        <Route index element={<Navigate to="geral" replace />} />
+        {visibleModules.map((m) => {
           const Component = m.component;
           return <Route key={m.slug} path={m.slug} element={<Component />} />;
         })}
-        <Route path="*" element={<Navigate to={adminModules[0].slug} replace />} />
+        <Route path="*" element={<Navigate to="geral" replace />} />
       </Route>
     </Routes>
   );

@@ -1,9 +1,9 @@
 import { NavLink, Outlet } from "react-router";
 import { LogOut } from "lucide-react";
-import { adminModules } from "./modules";
+import type { AdminModule } from "./modules";
 import { signOut } from "./auth";
 
-export function AdminLayout() {
+export function AdminLayout({ modules }: { modules: AdminModule[] }) {
   return (
     <div className="min-h-screen flex bg-[#050505]">
       <aside
@@ -18,7 +18,7 @@ export function AdminLayout() {
         </p>
 
         <nav className="flex flex-col gap-1 flex-1">
-          {adminModules.map((m) => {
+          {modules.map((m) => {
             const Icon = m.icon;
             return (
               <NavLink
