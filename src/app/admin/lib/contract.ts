@@ -148,14 +148,16 @@ Representante Legal
 {{contratados_assinaturas}}`;
 
 function qualificacaoBlock(signatories: ContractSignatory[]): string {
-  return signatories.map((m) => `${m.name.toUpperCase()}, inscrito no CPF nº ${m.cpf};`).join("\n\n");
+  return signatories
+    .map((m) => `${m.name.toUpperCase()}${m.role ? `, ${m.role}` : ""}, inscrito no CPF nº ${m.cpf};`)
+    .join("\n\n");
 }
 
 function assinaturasBlock(signatories: ContractSignatory[]): string {
   return signatories
     .map(
       (m) =>
-        `CONTRATADOS:\n\n____________________________________________\n${m.name}\nCPF nº ${m.cpf}`,
+        `CONTRATADOS:\n\n____________________________________________\n${m.name}${m.role ? `\n${m.role}` : ""}\nCPF nº ${m.cpf}`,
     )
     .join("\n\n\n");
 }

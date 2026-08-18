@@ -44,7 +44,7 @@ export function ContractEditor({
 }) {
   const [form, setForm] = useState(formFromContract(initial));
   const [selectedClientId, setSelectedClientId] = useState("");
-  const [newMember, setNewMember] = useState({ name: "", cpf: "" });
+  const [newMember, setNewMember] = useState({ name: "", cpf: "", role: "" });
   const [previewOpen, setPreviewOpen] = useState(true);
 
   function toggleSignatory(name: string) {
@@ -57,9 +57,10 @@ export function ContractEditor({
   function addRosterMember() {
     const name = newMember.name.trim();
     const cpf = newMember.cpf.trim();
+    const role = newMember.role.trim();
     if (!name || !cpf || roster.some((m) => m.name === name)) return;
-    onAddRosterMember({ name, cpf });
-    setNewMember({ name: "", cpf: "" });
+    onAddRosterMember({ name, cpf, role: role || undefined });
+    setNewMember({ name: "", cpf: "", role: "" });
   }
 
   function removeRosterMember(name: string) {
@@ -218,6 +219,7 @@ export function ContractEditor({
                       }}
                     >
                       {m.name}
+                      {m.role && <span style={{ opacity: 0.6 }}>· {m.role}</span>}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -244,7 +246,14 @@ export function ContractEditor({
                   value={newMember.cpf}
                   onChange={(e) => setNewMember({ ...newMember, cpf: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && addRosterMember()}
-                  className="!py-1.5 !w-40"
+                  className="!py-1.5 !w-32"
+                />
+                <TextInput
+                  placeholder="Função"
+                  value={newMember.role}
+                  onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                  onKeyDown={(e) => e.key === "Enter" && addRosterMember()}
+                  className="!py-1.5 !w-32"
                 />
                 <Button onClick={addRosterMember}>Add</Button>
               </div>
