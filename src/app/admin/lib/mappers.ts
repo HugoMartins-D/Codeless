@@ -1,4 +1,4 @@
-import type { Client, Collaborator, Contract, Task, Transaction } from "../types";
+import type { Client, ClientStatusHistoryEntry, Collaborator, Contract, Task, Transaction } from "../types";
 
 export const fromTransactionRow = (r: any): Transaction => ({
   id: r.id,
@@ -8,6 +8,7 @@ export const fromTransactionRow = (r: any): Transaction => ({
   amount: Number(r.amount),
   date: r.date,
   invoiceIssued: r.invoice_issued ?? undefined,
+  clientId: r.client_id ?? undefined,
 });
 
 export const toTransactionRow = (t: Transaction) => ({
@@ -18,6 +19,7 @@ export const toTransactionRow = (t: Transaction) => ({
   amount: t.amount,
   date: t.date,
   invoice_issued: t.type === "receita" ? !!t.invoiceIssued : null,
+  client_id: t.clientId || null,
 });
 
 export const fromContractRow = (r: any): Contract => ({
@@ -35,6 +37,7 @@ export const fromContractRow = (r: any): Contract => ({
   city: r.city ?? "Balneário Camboriú",
   status: r.status,
   createdAt: r.created_at,
+  clientId: r.client_id ?? undefined,
 });
 
 export const toContractRow = (c: Contract) => ({
@@ -52,6 +55,7 @@ export const toContractRow = (c: Contract) => ({
   city: c.city,
   status: c.status,
   created_at: c.createdAt,
+  client_id: c.clientId || null,
 });
 
 export const fromClientRow = (r: any): Client => ({
@@ -79,6 +83,7 @@ export const fromTaskRow = (r: any): Task => ({
   dueDate: r.due_date ?? undefined,
   status: r.status,
   deliverableUrl: r.deliverable_url ?? undefined,
+  contractId: r.contract_id ?? undefined,
 });
 
 export const toTaskRow = (t: Task) => ({
@@ -90,6 +95,7 @@ export const toTaskRow = (t: Task) => ({
   due_date: t.dueDate || null,
   status: t.status,
   deliverable_url: t.deliverableUrl || null,
+  contract_id: t.contractId || null,
 });
 
 export const fromCollaboratorRow = (r: any): Collaborator => ({
@@ -110,4 +116,22 @@ export const toCollaboratorRow = (c: Collaborator) => ({
   module_access: c.moduleAccess,
   client_access: c.clientAccess,
   can_create_demandas: c.canCreateDemandas,
+});
+
+export const fromClientStatusHistoryRow = (r: any): ClientStatusHistoryEntry => ({
+  id: r.id,
+  clientId: r.client_id,
+  status: r.status,
+  reasonPreset: r.reason_preset ?? undefined,
+  reasonNote: r.reason_note ?? undefined,
+  changedAt: r.changed_at,
+});
+
+export const toClientStatusHistoryRow = (h: ClientStatusHistoryEntry) => ({
+  id: h.id,
+  client_id: h.clientId,
+  status: h.status,
+  reason_preset: h.reasonPreset || null,
+  reason_note: h.reasonNote || null,
+  changed_at: h.changedAt,
 });

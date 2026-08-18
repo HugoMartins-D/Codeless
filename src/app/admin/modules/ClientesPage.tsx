@@ -2,11 +2,20 @@ import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { uid } from "../lib/storage";
 import { useSupabaseTable } from "../lib/supabaseData";
-import { fromClientRow, toClientRow } from "../lib/mappers";
+import {
+  fromClientRow,
+  toClientRow,
+  fromTransactionRow,
+  toTransactionRow,
+  fromContractRow,
+  toContractRow,
+  fromClientStatusHistoryRow,
+  toClientStatusHistoryRow,
+} from "../lib/mappers";
 import { parseSimpleCsv } from "../lib/csv";
-import type { Client, ClientStatus } from "../types";
-import { Panel, Field, TextInput, SelectInput, Button, Badge } from "../ui/primitives";
-import { Modal } from "../ui/Modal";
+import type { Client, ClientStatus, ClientStatusHistoryEntry, Contract, Transaction } from "../types";
+import { ClienteDetail } from "./ClienteDetail";
+import { Panel, Button, Badge } from "../ui/primitives";
 import { currency, headingFont } from "../ui/tokens";
 
 const STATUSES: ClientStatus[] = ["ativo", "pausado", "prospect", "ex-cliente"];
@@ -18,42 +27,37 @@ const statusTone: Record<ClientStatus, "accent" | "warn" | "neutral" | "danger">
   "ex-cliente": "danger",
 };
 
-const emptyForm = { name: "", contact: "", status: "prospect" as ClientStatus, recurringValue: "" };
-
 export function ClientesPage() {
   const [clients, setClients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const [transactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
+  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const [statusHistory, setStatusHistory] = useSupabaseTable<ClientStatusHistoryEntry>(
+    "client_status_history",
+    fromClientStatusHistoryRow,
+    toClientStatusHistoryRow,
+  );
+
   const [filter, setFilter] = useState<ClientStatus | "todos">("todos");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => (filter === "todos" ? clients : clients.filter((c) => c.status === filter)), [clients, filter]);
 
   function openNew() {
-    setEditingId(null);
-    setForm(emptyForm);
-    setModalOpen(true);
+    setEditingClient(null);
+    setDetailOpen(true);
   }
 
-  function openEdit(c: Client) {
-    setEditingId(c.id);
-    setForm({ name: c.name, contact: c.contact, status: c.status, recurringValue: c.recurringValue ? String(c.recurringValue) : "" });
-    setModalOpen(true);
+  function openDetail(c: Client) {
+    setEditingClient(c);
+    setDetailOpen(true);
   }
 
-  function submit() {
-    if (!form.name.trim()) return;
-    const recurringValue = form.recurringValue ? Number(form.recurringValue.replace(",", ".")) : undefined;
-
-    if (editingId) {
-      setClients((prev) =>
-        prev.map((c) => (c.id === editingId ? { ...c, name: form.name, contact: form.contact, status: form.status, recurringValue } : c)),
-      );
-    } else {
-      setClients((prev) => [{ id: uid(), name: form.name, contact: form.contact, status: form.status, recurringValue }, ...prev]);
-    }
-    setModalOpen(false);
+  function handleSave(client: Client, historyEntry: ClientStatusHistoryEntry | null) {
+    setClients((prev) => (prev.some((c) => c.id === client.id) ? prev.map((c) => (c.id === client.id ? client : c)) : [client, ...prev]));
+    if (historyEntry) setStatusHistory((prev) => [historyEntry, ...prev]);
+    setDetailOpen(false);
   }
 
   function remove(id: string) {
@@ -120,7 +124,7 @@ export function ClientesPage() {
         <div className="flex flex-col gap-1">
           {filtered.map((c) => (
             <div key={c.id} className="flex items-center justify-between gap-3 py-2.5 px-2 rounded-lg hover:bg-white/[0.03] transition-colors group">
-              <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => openEdit(c)}>
+              <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => openDetail(c)}>
                 <span className="text-white/70 text-sm truncate">{c.name}</span>
                 <span className="text-white/30 text-xs truncate">{c.contact}</span>
               </button>
@@ -134,36 +138,16 @@ export function ClientesPage() {
         </div>
       </Panel>
 
-      <Modal open={modalOpen} onOpenChange={setModalOpen} title={editingId ? "Editar cliente" : "Novo cliente"}>
-        <div className="flex flex-col gap-4">
-          <Field label="Nome">
-            <TextInput value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </Field>
-          <Field label="Contato">
-            <TextInput value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} placeholder="Telefone, e-mail..." />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Status">
-              <SelectInput value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as ClientStatus })}>
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </SelectInput>
-            </Field>
-            <Field label="Valor recorrente (R$)">
-              <TextInput value={form.recurringValue} onChange={(e) => setForm({ ...form, recurringValue: e.target.value })} inputMode="decimal" />
-            </Field>
-          </div>
-          <div className="flex justify-end gap-2 mt-2">
-            <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button variant="primary" onClick={submit}>
-              {editingId ? "Salvar" : "Adicionar"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      {detailOpen && (
+        <ClienteDetail
+          initial={editingClient}
+          transactions={transactions}
+          contracts={contracts}
+          statusHistory={statusHistory}
+          onSave={handleSave}
+          onClose={() => setDetailOpen(false)}
+        />
+      )}
     </div>
   );
 }

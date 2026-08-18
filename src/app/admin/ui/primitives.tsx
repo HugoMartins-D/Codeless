@@ -1,10 +1,18 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ACCENT, DANGER, panelStyle } from "./tokens";
 
-export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Panel({
+  children,
+  className = "",
+  style,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
-    <div className={`rounded-2xl p-6 ${className}`} style={panelStyle}>
+    <div className={`rounded-2xl p-6 ${className}`} style={{ ...panelStyle, ...style }}>
       {children}
     </div>
   );

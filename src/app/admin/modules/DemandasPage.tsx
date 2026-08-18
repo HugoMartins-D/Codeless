@@ -1,14 +1,25 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, ArrowRight, ArrowLeft, List, KanbanSquare, Link as LinkIcon } from "lucide-react";
+import { Plus, Trash2, ArrowRight, ArrowLeft, List, KanbanSquare, Link as LinkIcon, FileText, AlertCircle, Clock } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useLocalStorage, uid } from "../lib/storage";
 import { useSupabaseTable } from "../lib/supabaseData";
-import { fromTaskRow, toTaskRow, fromClientRow, toClientRow, fromCollaboratorRow, toCollaboratorRow } from "../lib/mappers";
-import type { Client, Collaborator, Task, TaskStatus } from "../types";
+import {
+  fromTaskRow,
+  toTaskRow,
+  fromClientRow,
+  toClientRow,
+  fromCollaboratorRow,
+  toCollaboratorRow,
+  fromContractRow,
+  toContractRow,
+} from "../lib/mappers";
+import { getTaskUrgency, type TaskUrgency } from "../lib/demandas";
+import type { Client, Collaborator, Contract, Task, TaskStatus } from "../types";
 import { ADMIN_EMAIL, useMyAccess } from "../lib/access";
 import { useSession } from "../auth";
 import { Panel, Field, TextInput, TextArea, SelectInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
-import { headingFont } from "../ui/tokens";
+import { DANGER, headingFont } from "../ui/tokens";
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: "todo", label: "A fazer" },
@@ -22,13 +33,29 @@ const statusTone: Record<TaskStatus, "neutral" | "warn" | "accent"> = {
   done: "accent",
 };
 
-const emptyForm = { title: "", client: "", description: "", assignee: "", dueDate: "", status: "todo" as TaskStatus, deliverableUrl: "" };
+const urgencyStyle: Record<TaskUrgency, { color: string; Icon: LucideIcon | null }> = {
+  overdue: { color: DANGER, Icon: AlertCircle },
+  soon: { color: "#f5c400", Icon: Clock },
+  normal: { color: "rgba(255,255,255,0.4)", Icon: null },
+};
+
+const emptyForm = {
+  title: "",
+  client: "",
+  description: "",
+  assignee: "",
+  dueDate: "",
+  status: "todo" as TaskStatus,
+  deliverableUrl: "",
+  contractId: "",
+};
 
 export function DemandasPage() {
   const access = useMyAccess(useSession() ?? null);
   const [tasks, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
   const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
   const [collaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
+  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
   const [view, setView] = useLocalStorage<"lista" | "kanban">("admin_demandas_view", "lista");
 
   const assigneeOptions = [
@@ -39,6 +66,20 @@ export function DemandasPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
+
+  const contractsForClient = useMemo(
+    () => contracts.filter((c) => c.clientCompanyName.trim().toLowerCase() === form.client.trim().toLowerCase()),
+    [contracts, form.client],
+  );
+
+  function contractLabel(contractId?: string) {
+    if (!contractId) return null;
+    const c = contracts.find((x) => x.id === contractId);
+    if (!c) return null;
+    const scope = c.projectObject ? (c.projectObject.length > 30 ? `${c.projectObject.slice(0, 30)}…` : c.projectObject) : "Contrato";
+    return scope;
+  }
 
   function openNew() {
     setEditingId(null);
@@ -56,6 +97,7 @@ export function DemandasPage() {
       dueDate: t.dueDate ?? "",
       status: t.status,
       deliverableUrl: t.deliverableUrl ?? "",
+      contractId: t.contractId ?? "",
     });
     setModalOpen(true);
   }
@@ -85,14 +127,30 @@ export function DemandasPage() {
     );
   }
 
+  const workload = useMemo(() => {
+    const counts = new Map<string, number>();
+    tasks
+      .filter((t) => t.status !== "done")
+      .forEach((t) => {
+        const name = t.assignee || "Sem responsável";
+        counts.set(name, (counts.get(name) ?? 0) + 1);
+      });
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+  }, [tasks]);
+
+  const visibleTasks = useMemo(
+    () => (assigneeFilter ? tasks.filter((t) => (t.assignee || "Sem responsável") === assigneeFilter) : tasks),
+    [tasks, assigneeFilter],
+  );
+
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
-    tasks.forEach((t) => {
+    visibleTasks.forEach((t) => {
       const key = t.client || "Sem cliente";
       map.set(key, [...(map.get(key) ?? []), t]);
     });
     return Array.from(map.entries());
-  }, [tasks]);
+  }, [visibleTasks]);
 
   return (
     <div className="max-w-5xl">
@@ -125,92 +183,148 @@ export function DemandasPage() {
         </div>
       </div>
 
-      {tasks.length === 0 && (
+      {workload.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {workload.map(([name, count]) => {
+            const active = assigneeFilter === name;
+            return (
+              <button
+                key={name}
+                onClick={() => setAssigneeFilter(active ? null : name)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-colors"
+                style={{
+                  background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                  border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                  color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                }}
+              >
+                {name} <span style={{ opacity: 0.6 }}>· {count} em aberto</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {visibleTasks.length === 0 && (
         <Panel>
-          <p className="text-white/30 text-sm">Nenhuma demanda ainda.</p>
+          <p className="text-white/30 text-sm">{assigneeFilter ? "Nenhuma demanda em aberto para essa pessoa." : "Nenhuma demanda ainda."}</p>
         </Panel>
       )}
 
-      {view === "lista" && tasks.length > 0 && (
+      {view === "lista" && visibleTasks.length > 0 && (
         <div className="flex flex-col gap-4">
           {grouped.map(([client, items]) => (
             <Panel key={client}>
               <p className="text-white/50 text-[11px] tracking-widest uppercase mb-3">{client}</p>
               <div className="flex flex-col gap-1">
-                {items.map((t) => (
-                  <div key={t.id} className="flex items-center justify-between gap-3 py-2 px-2 rounded-lg hover:bg-white/[0.03] transition-colors group">
-                    <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => openEdit(t)}>
-                      <span className="text-white/70 text-sm truncate">{t.title}</span>
-                      {t.assignee && <span className="text-white/30 text-xs shrink-0">{t.assignee}</span>}
-                    </button>
-                    {t.deliverableUrl && (
-                      <a
-                        href={t.deliverableUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[#c7d300]/70 hover:text-[#c7d300] shrink-0"
-                        title="Ver entregável"
-                      >
-                        <LinkIcon size={14} />
-                      </a>
-                    )}
-                    {t.dueDate && <span className="text-white/40 text-xs shrink-0">{t.dueDate}</span>}
-                    <Badge tone={statusTone[t.status]}>{COLUMNS.find((c) => c.status === t.status)?.label}</Badge>
-                    <button onClick={() => remove(t.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors opacity-0 group-hover:opacity-100 shrink-0">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
+                {items.map((t) => {
+                  const urgency = getTaskUrgency(t.dueDate, t.status);
+                  const uStyle = urgencyStyle[urgency];
+                  const scope = contractLabel(t.contractId);
+                  return (
+                    <div
+                      key={t.id}
+                      className="flex items-center justify-between gap-3 py-2 px-2 rounded-lg hover:bg-white/[0.03] transition-colors group"
+                      style={urgency !== "normal" ? { borderLeft: `2px solid ${uStyle.color}` } : undefined}
+                    >
+                      <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => openEdit(t)}>
+                        <span className="text-white/70 text-sm truncate">{t.title}</span>
+                        {t.assignee && <span className="text-white/30 text-xs shrink-0">{t.assignee}</span>}
+                        {scope && (
+                          <span className="inline-flex items-center gap-1 text-white/25 text-xs shrink-0">
+                            <FileText size={11} /> {scope}
+                          </span>
+                        )}
+                      </button>
+                      {t.deliverableUrl && (
+                        <a
+                          href={t.deliverableUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[#c7d300]/70 hover:text-[#c7d300] shrink-0"
+                          title="Ver entregável"
+                        >
+                          <LinkIcon size={14} />
+                        </a>
+                      )}
+                      {t.dueDate && (
+                        <span className="inline-flex items-center gap-1 text-xs shrink-0" style={{ color: uStyle.color }}>
+                          {uStyle.Icon && <uStyle.Icon size={12} />}
+                          {t.dueDate}
+                        </span>
+                      )}
+                      <Badge tone={statusTone[t.status]}>{COLUMNS.find((c) => c.status === t.status)?.label}</Badge>
+                      <button onClick={() => remove(t.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors opacity-0 group-hover:opacity-100 shrink-0">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </Panel>
           ))}
         </div>
       )}
 
-      {view === "kanban" && tasks.length > 0 && (
+      {view === "kanban" && visibleTasks.length > 0 && (
         <div className="grid md:grid-cols-3 gap-4">
           {COLUMNS.map((col) => (
             <div key={col.status}>
               <p className="text-white/50 text-[11px] tracking-widest uppercase mb-3">
-                {col.label} · {tasks.filter((t) => t.status === col.status).length}
+                {col.label} · {visibleTasks.filter((t) => t.status === col.status).length}
               </p>
               <div className="flex flex-col gap-2">
-                {tasks
+                {visibleTasks
                   .filter((t) => t.status === col.status)
-                  .map((t) => (
-                    <Panel key={t.id} className="!p-4">
-                      <button className="text-left w-full" onClick={() => openEdit(t)}>
-                        <p className="text-white/80 text-sm mb-1">{t.title}</p>
-                        <p className="text-white/30 text-xs">{t.client || "Sem cliente"}</p>
-                        {t.assignee && <p className="text-white/30 text-xs">{t.assignee}</p>}
-                        {t.deliverableUrl && (
-                          <span className="inline-flex items-center gap-1 text-[#c7d300]/70 text-xs mt-1">
-                            <LinkIcon size={11} /> entregue
-                          </span>
-                        )}
-                      </button>
-                      <div className="flex items-center justify-between mt-3">
-                        <button
-                          disabled={col.status === "todo"}
-                          onClick={() => moveStatus(t.id, -1)}
-                          className="text-white/30 hover:text-white/70 disabled:opacity-20"
-                        >
-                          <ArrowLeft size={14} />
+                  .map((t) => {
+                    const urgency = getTaskUrgency(t.dueDate, t.status);
+                    const uStyle = urgencyStyle[urgency];
+                    const scope = contractLabel(t.contractId);
+                    return (
+                      <Panel key={t.id} className="!p-4" style={urgency !== "normal" ? { borderLeft: `3px solid ${uStyle.color}` } : undefined}>
+                        <button className="text-left w-full" onClick={() => openEdit(t)}>
+                          <p className="text-white/80 text-sm mb-1">{t.title}</p>
+                          <p className="text-white/30 text-xs">{t.client || "Sem cliente"}</p>
+                          {t.assignee && <p className="text-white/30 text-xs">{t.assignee}</p>}
+                          {scope && (
+                            <p className="inline-flex items-center gap-1 text-white/25 text-xs mt-1">
+                              <FileText size={11} /> {scope}
+                            </p>
+                          )}
+                          {t.dueDate && (
+                            <p className="inline-flex items-center gap-1 text-xs mt-1" style={{ color: uStyle.color }}>
+                              {uStyle.Icon && <uStyle.Icon size={11} />} {t.dueDate}
+                            </p>
+                          )}
+                          {t.deliverableUrl && (
+                            <span className="inline-flex items-center gap-1 text-[#c7d300]/70 text-xs mt-1">
+                              <LinkIcon size={11} /> entregue
+                            </span>
+                          )}
                         </button>
-                        <button onClick={() => remove(t.id)} className="text-white/20 hover:text-[#e93e8f]">
-                          <Trash2 size={13} />
-                        </button>
-                        <button
-                          disabled={col.status === "done"}
-                          onClick={() => moveStatus(t.id, 1)}
-                          className="text-white/30 hover:text-white/70 disabled:opacity-20"
-                        >
-                          <ArrowRight size={14} />
-                        </button>
-                      </div>
-                    </Panel>
-                  ))}
+                        <div className="flex items-center justify-between mt-3">
+                          <button
+                            disabled={col.status === "todo"}
+                            onClick={() => moveStatus(t.id, -1)}
+                            className="text-white/30 hover:text-white/70 disabled:opacity-20"
+                          >
+                            <ArrowLeft size={14} />
+                          </button>
+                          <button onClick={() => remove(t.id)} className="text-white/20 hover:text-[#e93e8f]">
+                            <Trash2 size={13} />
+                          </button>
+                          <button
+                            disabled={col.status === "done"}
+                            onClick={() => moveStatus(t.id, 1)}
+                            className="text-white/30 hover:text-white/70 disabled:opacity-20"
+                          >
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      </Panel>
+                    );
+                  })}
               </div>
             </div>
           ))}
@@ -223,12 +337,31 @@ export function DemandasPage() {
             <TextInput value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </Field>
           <Field label="Cliente">
-            <TextInput value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} list="clientes-list" placeholder="Nome do cliente" />
+            <TextInput
+              value={form.client}
+              onChange={(e) => setForm({ ...form, client: e.target.value, contractId: "" })}
+              list="clientes-list"
+              placeholder="Nome do cliente"
+            />
             <datalist id="clientes-list">
               {clients.map((c) => (
                 <option key={c.id} value={c.name} />
               ))}
             </datalist>
+          </Field>
+          <Field label="Contrato / escopo">
+            <SelectInput
+              value={form.contractId}
+              onChange={(e) => setForm({ ...form, contractId: e.target.value })}
+              disabled={contractsForClient.length === 0}
+            >
+              <option value="">{contractsForClient.length === 0 ? "Nenhum contrato para esse cliente" : "Sem contrato vinculado"}</option>
+              {contractsForClient.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {(c.projectObject || "Contrato").slice(0, 50)} · {c.status}
+                </option>
+              ))}
+            </SelectInput>
           </Field>
           <Field label="Descrição">
             <TextArea

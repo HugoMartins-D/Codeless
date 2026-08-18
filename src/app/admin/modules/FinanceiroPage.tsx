@@ -3,9 +3,9 @@ import { Plus, Trash2, X as XIcon, FileCheck2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { uid } from "../lib/storage";
 import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
-import { fromTransactionRow, toTransactionRow } from "../lib/mappers";
+import { fromTransactionRow, toTransactionRow, fromClientRow, toClientRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
-import type { Transaction, TransactionType } from "../types";
+import type { Client, Transaction, TransactionType } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { ACCENT, DANGER, currency, headingFont } from "../ui/tokens";
@@ -22,10 +22,12 @@ const emptyForm = {
   amount: "",
   date: new Date().toISOString().slice(0, 10),
   invoiceIssued: false,
+  clientId: "",
 };
 
 export function FinanceiroPage() {
   const [transactions, setTransactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
+  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
   const [categories, setCategories] = useSupabaseSetting("financeiro_categories", DEFAULT_CATEGORIES);
   const [goal, setGoal] = useSupabaseSetting("financeiro_goal", 50000);
   const [goalDraft, setGoalDraft] = useState<string | null>(null);
@@ -53,6 +55,7 @@ export function FinanceiroPage() {
       amount: String(t.amount),
       date: t.date,
       invoiceIssued: !!t.invoiceIssued,
+      clientId: t.clientId ?? "",
     });
     setModalOpen(true);
   }
@@ -65,7 +68,16 @@ export function FinanceiroPage() {
       setTransactions((prev) =>
         prev.map((t) =>
           t.id === editingId
-            ? { ...t, type: form.type, category: form.category, description: form.description, amount, date: form.date, invoiceIssued: form.invoiceIssued }
+            ? {
+                ...t,
+                type: form.type,
+                category: form.category,
+                description: form.description,
+                amount,
+                date: form.date,
+                invoiceIssued: form.invoiceIssued,
+                clientId: form.clientId || undefined,
+              }
             : t,
         ),
       );
@@ -78,6 +90,7 @@ export function FinanceiroPage() {
         amount,
         date: form.date,
         invoiceIssued: form.type === "receita" ? form.invoiceIssued : undefined,
+        clientId: form.clientId || undefined,
       };
       setTransactions((prev) => [newTx, ...prev]);
     }
@@ -306,6 +319,18 @@ export function FinanceiroPage() {
           <Field label="Descrição">
             <TextInput value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Ex: Projeto site institucional" />
           </Field>
+          {clients.length > 0 && (
+            <Field label="Cliente (opcional)">
+              <SelectInput value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })}>
+                <option value="">Sem cliente vinculado</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </SelectInput>
+            </Field>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <Field label="Valor (R$)">
               <TextInput value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0,00" inputMode="decimal" />

@@ -8,6 +8,8 @@ export interface Transaction {
   amount: number;
   date: string; // yyyy-mm-dd
   invoiceIssued?: boolean; // só relevante para receitas
+  /** Referência ao cliente (id de Client), opcional. */
+  clientId?: string;
 }
 
 export type ContractStatus = "rascunho" | "enviado" | "assinado";
@@ -35,6 +37,8 @@ export interface Contract {
   city: string;
   status: ContractStatus;
   createdAt: string; // yyyy-mm-dd
+  /** Referência ao cliente (id de Client), opcional. */
+  clientId?: string;
 }
 
 export type ClientStatus = "ativo" | "pausado" | "prospect" | "ex-cliente";
@@ -45,6 +49,19 @@ export interface Client {
   contact: string;
   status: ClientStatus;
   recurringValue?: number;
+}
+
+/**
+ * Registro append-only: cada mudança de status para "pausado"/"ex-cliente"
+ * gera uma entrada nova aqui, nunca sobrescreve uma anterior.
+ */
+export interface ClientStatusHistoryEntry {
+  id: string;
+  clientId: string;
+  status: ClientStatus;
+  reasonPreset?: string;
+  reasonNote?: string;
+  changedAt: string; // ISO timestamp
 }
 
 export type TaskStatus = "todo" | "doing" | "done";
@@ -60,6 +77,8 @@ export interface Task {
   status: TaskStatus;
   /** Link do entregável (Drive, Dropbox, PDF, etc.) informado na entrega. */
   deliverableUrl?: string;
+  /** Contrato/escopo do módulo Contratos ao qual essa demanda pertence, opcional. */
+  contractId?: string;
 }
 
 export type CollaboratorStatus = "pending" | "approved" | "denied";
