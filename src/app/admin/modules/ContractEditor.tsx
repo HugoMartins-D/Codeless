@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { X, Eye, EyeOff, Download, Save } from "lucide-react";
 import { uid } from "../lib/storage";
 import { generateContractText, downloadTextFile } from "../lib/contract";
+import { renderContractBlocks } from "../lib/contractFormat";
 import type { Client, Contract, ContractSignatory } from "../types";
 import { Field, TextInput, SelectInput, TextArea, Button } from "../ui/primitives";
 import { headingFont } from "../ui/tokens";
@@ -257,10 +258,14 @@ export function ContractEditor({
 
         {previewOpen && (
           <div className="flex-1 overflow-y-auto p-8 hidden md:block" style={{ background: "#0a0a0a" }}>
-            <div className="max-w-2xl mx-auto rounded-lg p-10" style={{ background: "#fff", color: "#111", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}>
-              <pre className="whitespace-pre-wrap text-xs leading-relaxed" style={{ fontFamily: "'Courier New', monospace" }}>
-                {previewText}
-              </pre>
+            <div
+              className="max-w-2xl mx-auto rounded-lg overflow-hidden"
+              style={{ background: "#fff", color: "#111", boxShadow: "0 16px 48px rgba(0,0,0,0.5)" }}
+            >
+              <div style={{ height: 4, background: "#c7d300" }} />
+              <div className="p-10" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                {renderContractBlocks(previewText)}
+              </div>
             </div>
           </div>
         )}
