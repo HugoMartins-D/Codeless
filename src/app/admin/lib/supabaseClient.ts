@@ -13,4 +13,11 @@ if (!url || !anonKey) {
 // the whole app at module-eval time (this file is imported by every admin module,
 // pulled into the same bundle as the public site). Fall back to a harmless
 // placeholder so a missing config degrades to failed network calls instead.
-export const supabase = createClient(url || "https://placeholder.supabase.co", anonKey || "placeholder-anon-key");
+export const supabase = createClient(url || "https://placeholder.supabase.co", anonKey || "placeholder-anon-key", {
+  auth: {
+    // sessionStorage é isolado por aba (ao contrário do localStorage, que é
+    // compartilhado por todas as abas do mesmo site) — permite logar em
+    // contas diferentes em abas diferentes. Em troca, fechar a aba desloga.
+    storage: window.sessionStorage,
+  },
+});
