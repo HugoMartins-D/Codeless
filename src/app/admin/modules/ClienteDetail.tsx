@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { X, AlertTriangle } from "lucide-react";
 import { uid } from "../lib/storage";
 import { CLIENT_STATUS_REASON_PRESETS } from "../lib/clientStatus";
-import type { Client, ClientBillingType, ClientStatus, ClientStatusHistoryEntry, Contract, ContractStatus, Transaction } from "../types";
+import type { Client, ClientStatus, ClientStatusHistoryEntry, Contract, ContractStatus, Transaction } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
 import { ACCENT, DANGER, currency, headingFont, parseDecimal } from "../ui/tokens";
 
@@ -44,8 +44,8 @@ export function ClienteDetail({
     name: initial?.name ?? "",
     contact: initial?.contact ?? "",
     status: initial?.status ?? ("prospect" as ClientStatus),
-    billingType: initial?.billingType ?? ("recorrente" as ClientBillingType),
-    value: initial?.value ? String(initial.value) : "",
+    oneTimeValue: initial?.oneTimeValue ? String(initial.oneTimeValue) : "",
+    monthlyValue: initial?.monthlyValue ? String(initial.monthlyValue) : "",
   });
   const [reasonPreset, setReasonPreset] = useState("");
   const [reasonNote, setReasonNote] = useState("");
@@ -81,14 +81,13 @@ export function ClienteDetail({
     if (!form.name.trim()) return;
     if (needsReason && !reasonPreset) return;
 
-    const value = form.value ? parseDecimal(form.value) : undefined;
     const client: Client = {
       id: initial?.id ?? uid(),
       name: form.name,
       contact: form.contact,
       status: form.status,
-      billingType: form.billingType,
-      value,
+      oneTimeValue: form.oneTimeValue ? parseDecimal(form.oneTimeValue) : undefined,
+      monthlyValue: form.monthlyValue ? parseDecimal(form.monthlyValue) : undefined,
     };
     const historyEntry: ClientStatusHistoryEntry | null = needsReason
       ? {
@@ -136,32 +135,25 @@ export function ClienteDetail({
                 </SelectInput>
               </Field>
 
-              <Field label="Cobrança">
-                <div className="flex gap-2">
-                  {(["recorrente", "unico"] as ClientBillingType[]).map((type) => {
-                    const active = form.billingType === type;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setForm({ ...form, billingType: type })}
-                        className="px-3 py-1.5 rounded-full text-xs transition-colors"
-                        style={{
-                          background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
-                          border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                          color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
-                        }}
-                      >
-                        {type === "recorrente" ? "Recorrente (mensal)" : "Pagamento único"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <Field label={form.billingType === "unico" ? "Valor único (R$)" : "Valor mensal (R$)"}>
-                <TextInput value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} inputMode="decimal" />
-              </Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Valor único (R$)">
+                  <TextInput
+                    value={form.oneTimeValue}
+                    onChange={(e) => setForm({ ...form, oneTimeValue: e.target.value })}
+                    inputMode="decimal"
+                    placeholder="Ex: projeto fechado"
+                  />
+                </Field>
+                <Field label="Valor mensal (R$)">
+                  <TextInput
+                    value={form.monthlyValue}
+                    onChange={(e) => setForm({ ...form, monthlyValue: e.target.value })}
+                    inputMode="decimal"
+                    placeholder="Ex: manutenção recorrente"
+                  />
+                </Field>
+              </div>
+              <p className="text-white/25 text-xs -mt-2">Preencha os dois se o cliente pagar uma implantação única e também uma mensalidade.</p>
 
               {needsReason && (
                 <div className="rounded-lg p-4 flex flex-col gap-4" style={{ background: "rgba(233,62,143,0.06)", border: "1px solid rgba(233,62,143,0.25)" }}>

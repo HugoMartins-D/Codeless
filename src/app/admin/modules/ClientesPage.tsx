@@ -76,8 +76,8 @@ export function ClientesPage() {
           name: r.nome,
           contact: r.contato ?? "",
           status: (STATUSES as string[]).includes(r.status) ? (r.status as ClientStatus) : "prospect",
-          billingType: r.tipocobranca === "unico" ? "unico" : "recorrente",
-          value: r.valor || r.valorrecorrente ? Number(r.valor || r.valorrecorrente) : undefined,
+          oneTimeValue: r.valorunico ? Number(r.valorunico) : undefined,
+          monthlyValue: r.valormensal || r.valorrecorrente ? Number(r.valormensal || r.valorrecorrente) : undefined,
         }));
       setClients((prev) => [...imported, ...prev]);
     });
@@ -102,7 +102,7 @@ export function ClientesPage() {
       </div>
 
       <p className="text-white/30 text-xs mb-4">
-        CSV com colunas: nome, contato, status (ativo/pausado/prospect/ex-cliente), tipocobranca (recorrente/unico), valor.
+        CSV com colunas: nome, contato, status (ativo/pausado/prospect/ex-cliente), valorunico, valormensal.
       </p>
 
       <div className="flex gap-2 mb-6">
@@ -131,10 +131,11 @@ export function ClientesPage() {
                 <span className="text-white/70 text-sm truncate">{c.name}</span>
                 <span className="text-white/30 text-xs truncate">{c.contact}</span>
               </button>
-              {c.value != null && (
+              {(c.monthlyValue != null || c.oneTimeValue != null) && (
                 <span className="text-white/40 text-xs shrink-0">
-                  {currency(c.value)}
-                  {c.billingType === "unico" ? " (único)" : "/mês"}
+                  {[c.monthlyValue != null ? `${currency(c.monthlyValue)}/mês` : null, c.oneTimeValue != null ? `${currency(c.oneTimeValue)} único` : null]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </span>
               )}
               <Badge tone={statusTone[c.status]}>{c.status}</Badge>

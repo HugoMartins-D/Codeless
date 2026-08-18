@@ -63,8 +63,8 @@ export const fromClientRow = (r: any): Client => ({
   name: r.name,
   contact: r.contact ?? "",
   status: r.status,
-  billingType: r.billing_type ?? "recorrente",
-  value: r.value != null ? Number(r.value) : undefined,
+  oneTimeValue: r.one_time_value != null ? Number(r.one_time_value) : undefined,
+  monthlyValue: r.monthly_value != null ? Number(r.monthly_value) : undefined,
 });
 
 export const toClientRow = (c: Client) => ({
@@ -72,8 +72,8 @@ export const toClientRow = (c: Client) => ({
   name: c.name,
   contact: c.contact,
   status: c.status,
-  billing_type: c.billingType ?? "recorrente",
-  value: c.value ?? null,
+  one_time_value: c.oneTimeValue ?? null,
+  monthly_value: c.monthlyValue ?? null,
 });
 
 export const fromTaskRow = (r: any): Task => ({
