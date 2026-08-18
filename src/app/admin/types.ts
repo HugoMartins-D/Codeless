@@ -81,6 +81,14 @@ export interface Task {
   contractId?: string;
 }
 
+/** Perfil pessoal (nome de exibição + foto), editável pelo próprio usuário. */
+export interface Profile {
+  id: string; // auth.users.id
+  email: string;
+  name: string;
+  avatarUrl?: string;
+}
+
 export type CollaboratorStatus = "pending" | "approved" | "denied";
 
 export interface Collaborator {
