@@ -63,7 +63,8 @@ export const fromClientRow = (r: any): Client => ({
   name: r.name,
   contact: r.contact ?? "",
   status: r.status,
-  recurringValue: r.recurring_value != null ? Number(r.recurring_value) : undefined,
+  billingType: r.billing_type ?? "recorrente",
+  value: r.value != null ? Number(r.value) : undefined,
 });
 
 export const toClientRow = (c: Client) => ({
@@ -71,7 +72,8 @@ export const toClientRow = (c: Client) => ({
   name: c.name,
   contact: c.contact,
   status: c.status,
-  recurring_value: c.recurringValue ?? null,
+  billing_type: c.billingType ?? "recorrente",
+  value: c.value ?? null,
 });
 
 export const fromTaskRow = (r: any): Task => ({
