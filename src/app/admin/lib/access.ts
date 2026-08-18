@@ -16,13 +16,14 @@ export interface MyAccess {
   /** null só para o admin, que não tem linha em collaborators. */
   status: CollaboratorStatus | null;
   moduleAccess: string[];
+  canCreateDemandas: boolean;
 }
 
 export function hasAccess(access: MyAccess, module: string): boolean {
   return access.isAdmin || access.moduleAccess.includes(module);
 }
 
-const initialState: MyAccess = { loading: true, isAdmin: false, status: null, moduleAccess: [] };
+const initialState: MyAccess = { loading: true, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false };
 
 export function useMyAccess(session: Session | null): MyAccess {
   const email = session?.user.email;
@@ -30,12 +31,12 @@ export function useMyAccess(session: Session | null): MyAccess {
 
   useEffect(() => {
     if (!email) {
-      setState({ loading: false, isAdmin: false, status: null, moduleAccess: [] });
+      setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false });
       return;
     }
 
     if (email === ADMIN_EMAIL) {
-      setState({ loading: false, isAdmin: true, status: null, moduleAccess: [...GRANTABLE_MODULES] });
+      setState({ loading: false, isAdmin: true, status: null, moduleAccess: [...GRANTABLE_MODULES], canCreateDemandas: true });
       return;
     }
 
@@ -43,13 +44,13 @@ export function useMyAccess(session: Session | null): MyAccess {
     (async () => {
       const { data: existing, error: selectError } = await supabase
         .from("collaborators")
-        .select("status, module_access")
+        .select("status, module_access, can_create_demandas")
         .eq("email", email)
         .maybeSingle();
 
       if (selectError) {
         console.error("[access] falha ao buscar permissões", selectError);
-        if (!cancelled) setState({ loading: false, isAdmin: false, status: null, moduleAccess: [] });
+        if (!cancelled) setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false });
         return;
       }
 
@@ -57,7 +58,8 @@ export function useMyAccess(session: Session | null): MyAccess {
         const status = (existing.status ?? "pending") as CollaboratorStatus;
         // só concede acesso de verdade se um admin já aprovou explicitamente
         const moduleAccess = status === "approved" ? existing.module_access ?? [] : [];
-        if (!cancelled) setState({ loading: false, isAdmin: false, status, moduleAccess });
+        const canCreateDemandas = status === "approved" && !!existing.can_create_demandas && moduleAccess.includes("demandas");
+        if (!cancelled) setState({ loading: false, isAdmin: false, status, moduleAccess, canCreateDemandas });
         return;
       }
 
@@ -71,7 +73,7 @@ export function useMyAccess(session: Session | null): MyAccess {
         client_access: "all",
       });
       if (insertError) console.error("[access] falha ao auto-registrar colaborador", insertError);
-      if (!cancelled) setState({ loading: false, isAdmin: false, status: "pending", moduleAccess: [] });
+      if (!cancelled) setState({ loading: false, isAdmin: false, status: "pending", moduleAccess: [], canCreateDemandas: false });
     })();
 
     return () => {

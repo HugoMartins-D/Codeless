@@ -99,6 +99,7 @@ export const fromCollaboratorRow = (r: any): Collaborator => ({
   status: r.status ?? "pending",
   moduleAccess: r.module_access ?? [],
   clientAccess: r.client_access ?? "all",
+  canCreateDemandas: r.can_create_demandas ?? false,
 });
 
 export const toCollaboratorRow = (c: Collaborator) => ({
@@ -108,4 +109,5 @@ export const toCollaboratorRow = (c: Collaborator) => ({
   status: c.status,
   module_access: c.moduleAccess,
   client_access: c.clientAccess,
+  can_create_demandas: c.canCreateDemandas,
 });

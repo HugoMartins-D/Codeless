@@ -28,7 +28,7 @@ export function AcessosPage() {
   function submit() {
     if (!form.name.trim()) return;
     setCollaborators((prev) => [
-      { id: uid(), name: form.name, email: form.email, status: "approved", moduleAccess: [], clientAccess: "all" },
+      { id: uid(), name: form.name, email: form.email, status: "approved", moduleAccess: [], clientAccess: "all", canCreateDemandas: false },
       ...prev,
     ]);
     setForm(emptyForm);
@@ -47,10 +47,19 @@ export function AcessosPage() {
     setCollaborators((prev) =>
       prev.map((c) =>
         c.id === id
-          ? { ...c, moduleAccess: c.moduleAccess.includes(slug) ? c.moduleAccess.filter((m) => m !== slug) : [...c.moduleAccess, slug] }
+          ? {
+              ...c,
+              moduleAccess: c.moduleAccess.includes(slug) ? c.moduleAccess.filter((m) => m !== slug) : [...c.moduleAccess, slug],
+              // remover o acesso à aba Demandas também revoga a permissão de criar demandas
+              canCreateDemandas: slug === "demandas" && c.moduleAccess.includes(slug) ? false : c.canCreateDemandas,
+            }
           : c,
       ),
     );
+  }
+
+  function toggleCanCreateDemandas(id: string) {
+    setCollaborators((prev) => prev.map((c) => (c.id === id ? { ...c, canCreateDemandas: !c.canCreateDemandas } : c)));
   }
 
   function setClientAccessMode(id: string, mode: "all" | "custom") {
@@ -167,6 +176,18 @@ export function AcessosPage() {
                       );
                     })}
                   </div>
+
+                  {c.moduleAccess.includes("demandas") && (
+                    <label className="flex items-center gap-2 mb-4 cursor-pointer w-fit">
+                      <input
+                        type="checkbox"
+                        checked={c.canCreateDemandas}
+                        onChange={() => toggleCanCreateDemandas(c.id)}
+                        className="accent-[#c7d300]"
+                      />
+                      <span className="text-white/50 text-xs">Pode criar novas demandas (não só ver/atualizar as que já existem)</span>
+                    </label>
+                  )}
 
                   <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Clientes visíveis</p>
                   <div className="flex gap-2 mb-3">
