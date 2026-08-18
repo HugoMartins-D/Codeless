@@ -3,21 +3,24 @@ import { Plus, Trash2, Copy, Download } from "lucide-react";
 import { uid } from "../lib/storage";
 import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
 import { fromContractRow, toContractRow } from "../lib/mappers";
-import { DEFAULT_TEMPLATE, generateContractText, downloadTextFile } from "../lib/contract";
-import type { Contract, ContractStatus, PaymentMethod } from "../types";
+import { DEFAULT_TEMPLATE, TEAM_ROSTER, generateContractText, downloadTextFile } from "../lib/contract";
+import type { Contract, ContractStatus } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { currency, headingFont } from "../ui/tokens";
 
 const emptyForm = {
-  clientName: "",
-  cpf: "",
-  address: "",
-  totalValue: "",
-  paymentMethod: "pix" as PaymentMethod,
-  installments: "1",
-  validity: "",
-  scope: "",
+  clientCompanyName: "",
+  clientCnpj: "",
+  clientAddress: "",
+  clientRepresentative: "",
+  projectObject: "",
+  implementationValue: "",
+  implementationDueDate: "",
+  monthlyValue: "",
+  monthlyDueDay: "25",
+  signatories: [] as string[],
+  city: "Balneário Camboriú",
 };
 
 const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
@@ -35,20 +38,31 @@ export function ContratosPage() {
 
   const [viewing, setViewing] = useState<Contract | null>(null);
 
+  function toggleSignatory(name: string) {
+    setForm((f) => ({
+      ...f,
+      signatories: f.signatories.includes(name) ? f.signatories.filter((s) => s !== name) : [...f.signatories, name],
+    }));
+  }
+
   function submit() {
-    const totalValue = Number(form.totalValue.replace(",", "."));
-    if (!form.clientName || !totalValue) return;
+    const implementationValue = Number(form.implementationValue.replace(",", "."));
+    const monthlyValue = Number(form.monthlyValue.replace(",", "."));
+    if (!form.clientCompanyName || !implementationValue || form.signatories.length === 0) return;
 
     const contract: Contract = {
       id: uid(),
-      clientName: form.clientName,
-      cpf: form.cpf,
-      address: form.address,
-      totalValue,
-      paymentMethod: form.paymentMethod,
-      installments: form.paymentMethod === "parcelado" ? Number(form.installments) || 1 : undefined,
-      validity: form.validity,
-      scope: form.scope,
+      clientCompanyName: form.clientCompanyName,
+      clientCnpj: form.clientCnpj,
+      clientAddress: form.clientAddress,
+      clientRepresentative: form.clientRepresentative,
+      projectObject: form.projectObject,
+      implementationValue,
+      implementationDueDate: form.implementationDueDate || undefined,
+      monthlyValue,
+      monthlyDueDay: Number(form.monthlyDueDay) || 25,
+      signatories: form.signatories,
+      city: form.city,
       status: "rascunho",
       createdAt: new Date().toISOString().slice(0, 10),
     };
@@ -79,8 +93,10 @@ export function ContratosPage() {
       <Panel className="mb-6">
         <p className="text-white/50 text-[11px] tracking-widest uppercase mb-3">Template do contrato</p>
         <TextArea rows={8} value={template} onChange={(e) => setTemplate(e.target.value)} className="text-xs font-mono" />
-        <p className="text-white/30 text-xs mt-2">
-          Placeholders disponíveis: {"{{nome}}"} {"{{cpf}}"} {"{{endereco}}"} {"{{valor}}"} {"{{forma_pagamento}}"} {"{{vigencia}}"} {"{{escopo}}"} {"{{data}}"}
+        <p className="text-white/30 text-xs mt-2 leading-relaxed">
+          Placeholders: {"{{contratante_nome}}"} {"{{contratante_cnpj}}"} {"{{contratante_endereco}}"} {"{{contratante_representante}}"}{" "}
+          {"{{projeto_objeto}}"} {"{{valor_implantacao}}"} {"{{data_vencimento_implantacao}}"} {"{{valor_mensal}}"} {"{{dia_vencimento_mensal}}"}{" "}
+          {"{{contratados_qualificacao}}"} {"{{contratados_assinaturas}}"} {"{{cidade}}"} {"{{data_assinatura}}"}
         </p>
       </Panel>
 
@@ -91,8 +107,8 @@ export function ContratosPage() {
           {contracts.map((c) => (
             <div key={c.id} className="flex items-center justify-between gap-3 py-2.5 px-2 rounded-lg hover:bg-white/[0.03] transition-colors group">
               <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => setViewing(c)}>
-                <span className="text-white/70 text-sm truncate">{c.clientName}</span>
-                <span className="text-white/30 text-xs shrink-0">{currency(c.totalValue)}</span>
+                <span className="text-white/70 text-sm truncate">{c.clientCompanyName}</span>
+                <span className="text-white/30 text-xs shrink-0">{currency(c.implementationValue)}</span>
               </button>
               <SelectInput
                 value={c.status}
@@ -114,40 +130,87 @@ export function ContratosPage() {
       </Panel>
 
       <Modal open={formOpen} onOpenChange={setFormOpen} title="Novo contrato">
-        <div className="flex flex-col gap-4">
-          <Field label="Nome do cliente">
-            <TextInput value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="CPF">
-              <TextInput value={form.cpf} onChange={(e) => setForm({ ...form, cpf: e.target.value })} />
-            </Field>
-            <Field label="Valor total (R$)">
-              <TextInput value={form.totalValue} onChange={(e) => setForm({ ...form, totalValue: e.target.value })} inputMode="decimal" />
-            </Field>
-          </div>
-          <Field label="Endereço">
-            <TextInput value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Forma de pagamento">
-              <SelectInput value={form.paymentMethod} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value as PaymentMethod })}>
-                <option value="pix">Pix</option>
-                <option value="parcelado">Parcelado</option>
-              </SelectInput>
-            </Field>
-            {form.paymentMethod === "parcelado" && (
-              <Field label="Parcelas">
-                <TextInput value={form.installments} onChange={(e) => setForm({ ...form, installments: e.target.value })} inputMode="numeric" />
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Cliente</p>
+            <div className="flex flex-col gap-4">
+              <Field label="Nome da empresa">
+                <TextInput value={form.clientCompanyName} onChange={(e) => setForm({ ...form, clientCompanyName: e.target.value })} />
               </Field>
-            )}
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="CNPJ">
+                  <TextInput value={form.clientCnpj} onChange={(e) => setForm({ ...form, clientCnpj: e.target.value })} />
+                </Field>
+                <Field label="Representante legal">
+                  <TextInput value={form.clientRepresentative} onChange={(e) => setForm({ ...form, clientRepresentative: e.target.value })} />
+                </Field>
+              </div>
+              <Field label="Endereço">
+                <TextInput value={form.clientAddress} onChange={(e) => setForm({ ...form, clientAddress: e.target.value })} />
+              </Field>
+            </div>
           </div>
-          <Field label="Vigência">
-            <TextInput value={form.validity} onChange={(e) => setForm({ ...form, validity: e.target.value })} placeholder="Ex: 6 meses" />
+
+          <div>
+            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Projeto</p>
+            <Field label="Objeto do contrato">
+              <TextArea
+                rows={3}
+                value={form.projectObject}
+                onChange={(e) => setForm({ ...form, projectObject: e.target.value })}
+                placeholder="Ex: um sistema de gestão interna e uma página de e-commerce"
+              />
+            </Field>
+          </div>
+
+          <div>
+            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Valor</p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <Field label="Valor de implantação (R$)">
+                <TextInput value={form.implementationValue} onChange={(e) => setForm({ ...form, implementationValue: e.target.value })} inputMode="decimal" />
+              </Field>
+              <Field label="Vencimento da implantação">
+                <TextInput type="date" value={form.implementationDueDate} onChange={(e) => setForm({ ...form, implementationDueDate: e.target.value })} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Mensalidade de manutenção (R$)">
+                <TextInput value={form.monthlyValue} onChange={(e) => setForm({ ...form, monthlyValue: e.target.value })} inputMode="decimal" />
+              </Field>
+              <Field label="Dia do vencimento mensal">
+                <TextInput value={form.monthlyDueDay} onChange={(e) => setForm({ ...form, monthlyDueDay: e.target.value })} inputMode="numeric" />
+              </Field>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Quem vai trabalhar e assinar o contrato</p>
+            <div className="flex flex-wrap gap-2">
+              {TEAM_ROSTER.map((m) => {
+                const active = form.signatories.includes(m.name);
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => toggleSignatory(m.name)}
+                    className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                    style={{
+                      background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                      border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                      color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                    }}
+                  >
+                    {m.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Field label="Cidade do contrato">
+            <TextInput value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
           </Field>
-          <Field label="Escopo do projeto">
-            <TextArea rows={4} value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value })} />
-          </Field>
+
           <div className="flex justify-end gap-2 mt-2">
             <Button onClick={() => setFormOpen(false)}>Cancelar</Button>
             <Button variant="primary" onClick={submit}>
@@ -157,10 +220,10 @@ export function ContratosPage() {
         </div>
       </Modal>
 
-      <Modal open={!!viewing} onOpenChange={(o) => !o && setViewing(null)} title={viewing?.clientName ?? ""}>
+      <Modal open={!!viewing} onOpenChange={(o) => !o && setViewing(null)} title={viewing?.clientCompanyName ?? ""}>
         {viewing && (
           <div className="flex flex-col gap-4">
-            <pre className="whitespace-pre-wrap text-white/70 text-xs leading-relaxed bg-white/[0.03] border border-white/10 rounded-lg p-4">
+            <pre className="whitespace-pre-wrap text-white/70 text-xs leading-relaxed bg-white/[0.03] border border-white/10 rounded-lg p-4 max-h-[50vh] overflow-y-auto">
               {generateContractText(template, viewing)}
             </pre>
             <div className="flex justify-end gap-2">
@@ -172,7 +235,7 @@ export function ContratosPage() {
               </Button>
               <Button
                 variant="primary"
-                onClick={() => downloadTextFile(`contrato-${viewing.clientName}.txt`, generateContractText(template, viewing))}
+                onClick={() => downloadTextFile(`contrato-${viewing.clientCompanyName}.txt`, generateContractText(template, viewing))}
                 className="inline-flex items-center gap-1.5"
               >
                 <Download size={13} /> Baixar .txt
