@@ -12,7 +12,7 @@ export const DEFAULT_TEMPLATE = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE DESENVO
 
 Pelo presente instrumento particular de contrato de prestação de serviços, de um lado:
 
-CONTRATANTE: {{contratante_nome}}, pessoa jurídica inscrita no CNPJ sob nº {{contratante_cnpj}}, com sede à {{contratante_endereco}}, neste ato representada por {{contratante_representante}}, doravante denominada simplesmente CONTRATANTE.
+CONTRATANTE: {{contratante_nome}}, pessoa física ou jurídica inscrita no CPF/CNPJ sob nº {{contratante_cpf/cnpj}}, com sede à {{contratante_endereco}}, neste ato representada por {{contratante_representante}}, doravante denominada simplesmente CONTRATANTE.
 
 E, de outro lado:
 
@@ -163,7 +163,7 @@ function assinaturasBlock(signatories: ContractSignatory[]): string {
 export function generateContractText(template: string, contract: Contract): string {
   return template
     .replaceAll("{{contratante_nome}}", contract.clientCompanyName)
-    .replaceAll("{{contratante_cnpj}}", contract.clientCnpj)
+    .replaceAll("{{contratante_cpf/cnpj}}", contract.clientCnpj)
     .replaceAll("{{contratante_endereco}}", contract.clientAddress)
     .replaceAll("{{contratante_representante}}", contract.clientRepresentative)
     .replaceAll("{{projeto_objeto}}", contract.projectObject)
