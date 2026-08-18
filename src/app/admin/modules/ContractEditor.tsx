@@ -43,7 +43,7 @@ export function ContractEditor({
   onClose: () => void;
 }) {
   const [form, setForm] = useState(formFromContract(initial));
-  const [selectedClientId, setSelectedClientId] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState(initial?.clientId ?? "");
   const [newMember, setNewMember] = useState({ name: "", cpf: "", role: "" });
   const [previewOpen, setPreviewOpen] = useState(true);
 
@@ -92,8 +92,9 @@ export function ContractEditor({
       city: form.city,
       status: initial?.status ?? "rascunho",
       createdAt: initial?.createdAt ?? new Date().toISOString().slice(0, 10),
+      clientId: selectedClientId || undefined,
     };
-  }, [form, roster, initial]);
+  }, [form, roster, initial, selectedClientId]);
 
   const previewText = useMemo(() => generateContractText(template, draft), [template, draft]);
 
@@ -130,7 +131,7 @@ export function ContractEditor({
         <div className={`overflow-y-auto p-6 ${previewOpen ? "w-full md:w-[440px] shrink-0" : "flex-1"}`}>
           <div className="flex flex-col gap-5 max-w-lg mx-auto md:mx-0">
             {clients.length > 0 && (
-              <Field label="Cliente (autofill)">
+              <Field label="Cliente">
                 <SelectInput value={selectedClientId} onChange={(e) => applyClientAutofill(e.target.value)}>
                   <option value="">Em branco / sem cliente</option>
                   {clients.map((c) => (
