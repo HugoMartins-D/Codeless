@@ -23,10 +23,10 @@ export interface AdminModule {
 }
 
 export const adminModules: AdminModule[] = [
+  { slug: "geral", title: "Geral", icon: LayoutDashboard, component: DashboardPage },
   { slug: "financeiro", title: "Financeiro", icon: Wallet, component: FinanceiroPage },
   { slug: "contratos", title: "Contratos", icon: FileText, component: ContratosPage },
   { slug: "demandas", title: "Demandas", icon: KanbanSquare, component: DemandasPage },
   { slug: "clientes", title: "Clientes", icon: Users, component: ClientesPage },
-  { slug: "dashboard", title: "Dashboard geral", icon: LayoutDashboard, component: DashboardPage },
   { slug: "acessos", title: "Acessos", icon: ShieldCheck, component: AcessosPage },
 ];
