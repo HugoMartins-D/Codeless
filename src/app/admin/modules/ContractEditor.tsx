@@ -147,7 +147,7 @@ export function ContractEditor({
                   <TextInput value={form.clientCompanyName} onChange={(e) => setForm({ ...form, clientCompanyName: e.target.value })} />
                 </Field>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="CNPJ">
+                  <Field label="CPF/CNPJ">
                     <TextInput value={form.clientCnpj} onChange={(e) => setForm({ ...form, clientCnpj: e.target.value })} />
                   </Field>
                   <Field label="Representante legal">
