@@ -11,18 +11,20 @@ export interface Transaction {
 }
 
 export type ContractStatus = "rascunho" | "enviado" | "assinado";
-export type PaymentMethod = "pix" | "parcelado";
 
 export interface Contract {
   id: string;
-  clientName: string;
-  cpf: string;
-  address: string;
-  totalValue: number;
-  paymentMethod: PaymentMethod;
-  installments?: number;
-  validity: string;
-  scope: string;
+  clientCompanyName: string;
+  clientCnpj: string;
+  clientAddress: string;
+  clientRepresentative: string;
+  projectObject: string;
+  implementationValue: number;
+  implementationDueDate?: string; // yyyy-mm-dd, opcional
+  monthlyValue: number;
+  monthlyDueDay: number; // dia do mês, ex: 25
+  signatories: string[]; // nomes selecionados do roster fixo de contratados
+  city: string;
   status: ContractStatus;
   createdAt: string; // yyyy-mm-dd
 }
