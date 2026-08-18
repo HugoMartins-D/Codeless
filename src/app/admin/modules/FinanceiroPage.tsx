@@ -8,7 +8,7 @@ import { computeFinanceSummary } from "../lib/finance";
 import type { Client, Transaction, TransactionType } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
-import { ACCENT, DANGER, currency, headingFont } from "../ui/tokens";
+import { ACCENT, DANGER, currency, headingFont, parseDecimal } from "../ui/tokens";
 
 const DEFAULT_CATEGORIES = {
   receita: ["Clientes fixos", "Landing pages", "Parcelados", "Infoprodutos"],
@@ -61,7 +61,7 @@ export function FinanceiroPage() {
   }
 
   function submit() {
-    const amount = Number(form.amount.replace(",", "."));
+    const amount = parseDecimal(form.amount);
     if (!form.category || !amount || amount <= 0) return;
 
     if (editingId) {
@@ -156,7 +156,7 @@ export function FinanceiroPage() {
               <button
                 className="text-xs text-[#c7d300]"
                 onClick={() => {
-                  const v = Number(goalDraft.replace(",", "."));
+                  const v = parseDecimal(goalDraft);
                   if (v > 0) setGoal(v);
                   setGoalDraft(null);
                 }}

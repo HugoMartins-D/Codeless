@@ -4,7 +4,7 @@ import { uid } from "../lib/storage";
 import { CLIENT_STATUS_REASON_PRESETS } from "../lib/clientStatus";
 import type { Client, ClientStatus, ClientStatusHistoryEntry, Contract, ContractStatus, Transaction } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
-import { ACCENT, DANGER, currency, headingFont } from "../ui/tokens";
+import { ACCENT, DANGER, currency, headingFont, parseDecimal } from "../ui/tokens";
 
 const STATUSES: ClientStatus[] = ["ativo", "pausado", "prospect", "ex-cliente"];
 
@@ -80,7 +80,7 @@ export function ClienteDetail({
     if (!form.name.trim()) return;
     if (needsReason && !reasonPreset) return;
 
-    const recurringValue = form.recurringValue ? Number(form.recurringValue.replace(",", ".")) : undefined;
+    const recurringValue = form.recurringValue ? parseDecimal(form.recurringValue) : undefined;
     const client: Client = {
       id: initial?.id ?? uid(),
       name: form.name,
