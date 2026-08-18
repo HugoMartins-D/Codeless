@@ -58,10 +58,13 @@ export interface Task {
   status: TaskStatus;
 }
 
+export type CollaboratorStatus = "pending" | "approved" | "denied";
+
 export interface Collaborator {
   id: string;
   name: string;
   email: string;
+  status: CollaboratorStatus;
   moduleAccess: string[]; // slugs de admin/modules.ts
   clientAccess: "all" | string[]; // ids de Client, ou "all"
 }

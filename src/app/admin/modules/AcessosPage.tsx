@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Check, X as XIcon, RotateCcw, ShieldOff } from "lucide-react";
 import { uid } from "../lib/storage";
 import { useSupabaseTable } from "../lib/supabaseData";
 import { fromCollaboratorRow, toCollaboratorRow, fromClientRow, toClientRow } from "../lib/mappers";
-import type { Client, Collaborator } from "../types";
+import type { Client, Collaborator, CollaboratorStatus } from "../types";
 import { adminModules } from "../modules";
 import { ADMIN_EMAIL, GRANTABLE_MODULES } from "../lib/access";
 import { Panel, Field, TextInput, Button, Badge } from "../ui/primitives";
@@ -11,6 +11,11 @@ import { Modal } from "../ui/Modal";
 import { headingFont } from "../ui/tokens";
 
 const emptyForm = { name: "", email: "" };
+
+const statusBadge: Partial<Record<CollaboratorStatus, { tone: "warn" | "danger"; label: string }>> = {
+  pending: { tone: "warn", label: "pendente" },
+  denied: { tone: "danger", label: "negado" },
+};
 
 export function AcessosPage() {
   const grantableModules = adminModules.filter((m) => (GRANTABLE_MODULES as readonly string[]).includes(m.slug));
@@ -22,13 +27,20 @@ export function AcessosPage() {
 
   function submit() {
     if (!form.name.trim()) return;
-    setCollaborators((prev) => [{ id: uid(), name: form.name, email: form.email, moduleAccess: [], clientAccess: "all" }, ...prev]);
+    setCollaborators((prev) => [
+      { id: uid(), name: form.name, email: form.email, status: "approved", moduleAccess: [], clientAccess: "all" },
+      ...prev,
+    ]);
     setForm(emptyForm);
     setModalOpen(false);
   }
 
   function remove(id: string) {
     setCollaborators((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function setStatus(id: string, status: CollaboratorStatus) {
+    setCollaborators((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
   }
 
   function toggleModule(id: string, slug: string) {
@@ -67,7 +79,8 @@ export function AcessosPage() {
       </div>
       <p className="text-white/30 text-xs mb-6">
         {ADMIN_EMAIL} é o administrador e sempre tem acesso total — não aparece nessa lista. Quando alguém cria uma conta no
-        login, ela entra aqui automaticamente como pendente, sem nenhuma aba liberada, até você marcar o que essa pessoa pode ver.
+        login, ela entra aqui como pendente. Você decide se permite ou nega o acesso e, depois de permitir, escolhe quais
+        abas e clientes essa pessoa pode ver.
       </p>
 
       {collaborators.length === 0 && (
@@ -77,91 +90,136 @@ export function AcessosPage() {
       )}
 
       <div className="flex flex-col gap-4">
-        {collaborators.map((c) => (
-          <Panel key={c.id}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div>
-                  <p className="text-white text-sm font-medium">{c.name}</p>
-                  {c.email && <p className="text-white/30 text-xs">{c.email}</p>}
+        {collaborators.map((c) => {
+          const badge = statusBadge[c.status];
+          const isPending = c.status === "pending";
+          const isDenied = c.status === "denied";
+          const isApproved = c.status === "approved";
+
+          return (
+            <Panel key={c.id}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div>
+                    <p className="text-white text-sm font-medium">{c.name}</p>
+                    {c.email && <p className="text-white/30 text-xs">{c.email}</p>}
+                  </div>
+                  {badge && <Badge tone={badge.tone}>{badge.label}</Badge>}
                 </div>
-                {c.moduleAccess.length === 0 && <Badge tone="warn">pendente</Badge>}
-              </div>
-              <button onClick={() => remove(c.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors">
-                <Trash2 size={14} />
-              </button>
-            </div>
-
-            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Abas visíveis</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {grantableModules.map((m) => {
-                const active = c.moduleAccess.includes(m.slug);
-                return (
-                  <button
-                    key={m.slug}
-                    onClick={() => toggleModule(c.id, m.slug)}
-                    className="px-3 py-1.5 rounded-full text-xs transition-colors"
-                    style={{
-                      background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
-                      border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                      color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
-                    }}
-                  >
-                    {m.title}
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Clientes visíveis</p>
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => setClientAccessMode(c.id, "all")}
-                className="px-3 py-1.5 rounded-full text-xs transition-colors"
-                style={{
-                  background: c.clientAccess === "all" ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
-                  border: c.clientAccess === "all" ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                  color: c.clientAccess === "all" ? "#c7d300" : "rgba(255,255,255,0.5)",
-                }}
-              >
-                Todos os clientes
-              </button>
-              <button
-                onClick={() => setClientAccessMode(c.id, "custom")}
-                className="px-3 py-1.5 rounded-full text-xs transition-colors"
-                style={{
-                  background: c.clientAccess !== "all" ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
-                  border: c.clientAccess !== "all" ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                  color: c.clientAccess !== "all" ? "#c7d300" : "rgba(255,255,255,0.5)",
-                }}
-              >
-                Selecionados
-              </button>
-            </div>
-            {c.clientAccess !== "all" && (
-              <div className="flex flex-wrap gap-2">
-                {clients.length === 0 && <p className="text-white/30 text-xs">Cadastre clientes no módulo Clientes primeiro.</p>}
-                {clients.map((cl) => {
-                  const active = c.clientAccess !== "all" && c.clientAccess.includes(cl.id);
-                  return (
+                <div className="flex items-center gap-3">
+                  {isPending && (
+                    <>
+                      <Button variant="primary" onClick={() => setStatus(c.id, "approved")} className="inline-flex items-center gap-1.5">
+                        <Check size={13} /> Permitir
+                      </Button>
+                      <Button variant="danger" onClick={() => setStatus(c.id, "denied")} className="inline-flex items-center gap-1.5">
+                        <XIcon size={13} /> Negar
+                      </Button>
+                    </>
+                  )}
+                  {isDenied && (
+                    <Button onClick={() => setStatus(c.id, "pending")} className="inline-flex items-center gap-1.5">
+                      <RotateCcw size={13} /> Reconsiderar
+                    </Button>
+                  )}
+                  {isApproved && (
                     <button
-                      key={cl.id}
-                      onClick={() => toggleClient(c.id, cl.id)}
+                      onClick={() => setStatus(c.id, "denied")}
+                      title="Negar acesso"
+                      className="text-white/20 hover:text-[#e93e8f] transition-colors"
+                    >
+                      <ShieldOff size={14} />
+                    </button>
+                  )}
+                  <button onClick={() => remove(c.id)} title="Excluir" className="text-white/20 hover:text-[#e93e8f] transition-colors">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {!isApproved && (
+                <p className="text-white/25 text-xs">
+                  {isPending
+                    ? "Permita o acesso para escolher quais abas e clientes essa pessoa pode ver."
+                    : "Acesso negado — essa pessoa não consegue entrar no painel."}
+                </p>
+              )}
+
+              {isApproved && (
+                <>
+                  <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Abas visíveis</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {grantableModules.map((m) => {
+                      const active = c.moduleAccess.includes(m.slug);
+                      return (
+                        <button
+                          key={m.slug}
+                          onClick={() => toggleModule(c.id, m.slug)}
+                          className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                          style={{
+                            background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                            border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                            color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                          }}
+                        >
+                          {m.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Clientes visíveis</p>
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      onClick={() => setClientAccessMode(c.id, "all")}
                       className="px-3 py-1.5 rounded-full text-xs transition-colors"
                       style={{
-                        background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
-                        border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                        color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                        background: c.clientAccess === "all" ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                        border: c.clientAccess === "all" ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                        color: c.clientAccess === "all" ? "#c7d300" : "rgba(255,255,255,0.5)",
                       }}
                     >
-                      {cl.name}
+                      Todos os clientes
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </Panel>
-        ))}
+                    <button
+                      onClick={() => setClientAccessMode(c.id, "custom")}
+                      className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                      style={{
+                        background: c.clientAccess !== "all" ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                        border: c.clientAccess !== "all" ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                        color: c.clientAccess !== "all" ? "#c7d300" : "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      Selecionados
+                    </button>
+                  </div>
+                  {c.clientAccess !== "all" && (
+                    <div className="flex flex-wrap gap-2">
+                      {clients.length === 0 && <p className="text-white/30 text-xs">Cadastre clientes no módulo Clientes primeiro.</p>}
+                      {clients.map((cl) => {
+                        const active = c.clientAccess !== "all" && c.clientAccess.includes(cl.id);
+                        return (
+                          <button
+                            key={cl.id}
+                            onClick={() => toggleClient(c.id, cl.id)}
+                            className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                            style={{
+                              background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                              border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                              color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                            }}
+                          >
+                            {cl.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </Panel>
+          );
+        })}
       </div>
 
       <Modal open={modalOpen} onOpenChange={setModalOpen} title="Novo colaborador">
@@ -172,6 +230,10 @@ export function AcessosPage() {
           <Field label="E-mail">
             <TextInput value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" />
           </Field>
+          <p className="text-white/25 text-xs">
+            Adicionado aqui já entra como aprovado — a pessoa ainda precisa criar a conta com esse mesmo e-mail na tela de
+            login.
+          </p>
           <div className="flex justify-end gap-2 mt-2">
             <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button variant="primary" onClick={submit}>
