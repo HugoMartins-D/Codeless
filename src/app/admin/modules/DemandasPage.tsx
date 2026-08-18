@@ -43,7 +43,7 @@ const emptyForm = {
   title: "",
   client: "",
   description: "",
-  assignee: "",
+  assignees: [] as string[],
   dueDate: "",
   status: "todo" as TaskStatus,
   deliverableUrl: "",
@@ -93,7 +93,7 @@ export function DemandasPage() {
       title: t.title,
       client: t.client,
       description: t.description ?? "",
-      assignee: t.assignee ?? "",
+      assignees: t.assignees ?? [],
       dueDate: t.dueDate ?? "",
       status: t.status,
       deliverableUrl: t.deliverableUrl ?? "",
@@ -132,14 +132,17 @@ export function DemandasPage() {
     tasks
       .filter((t) => t.status !== "done")
       .forEach((t) => {
-        const name = t.assignee || "Sem responsável";
-        counts.set(name, (counts.get(name) ?? 0) + 1);
+        const names = t.assignees.length > 0 ? t.assignees : ["Sem responsável"];
+        names.forEach((name) => counts.set(name, (counts.get(name) ?? 0) + 1));
       });
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
   }, [tasks]);
 
   const visibleTasks = useMemo(
-    () => (assigneeFilter ? tasks.filter((t) => (t.assignee || "Sem responsável") === assigneeFilter) : tasks),
+    () =>
+      assigneeFilter
+        ? tasks.filter((t) => (t.assignees.length > 0 ? t.assignees : ["Sem responsável"]).includes(assigneeFilter))
+        : tasks,
     [tasks, assigneeFilter],
   );
 
@@ -229,7 +232,7 @@ export function DemandasPage() {
                     >
                       <button className="flex items-center gap-3 flex-1 min-w-0 text-left" onClick={() => openEdit(t)}>
                         <span className="text-white/70 text-sm truncate">{t.title}</span>
-                        {t.assignee && <span className="text-white/30 text-xs shrink-0">{t.assignee}</span>}
+                        {t.assignees.length > 0 && <span className="text-white/30 text-xs shrink-0">{t.assignees.join(", ")}</span>}
                         {scope && (
                           <span className="inline-flex items-center gap-1 text-white/25 text-xs shrink-0">
                             <FileText size={11} /> {scope}
@@ -286,7 +289,7 @@ export function DemandasPage() {
                         <button className="text-left w-full" onClick={() => openEdit(t)}>
                           <p className="text-white/80 text-sm mb-1">{t.title}</p>
                           <p className="text-white/30 text-xs">{t.client || "Sem cliente"}</p>
-                          {t.assignee && <p className="text-white/30 text-xs">{t.assignee}</p>}
+                          {t.assignees.length > 0 && <p className="text-white/30 text-xs">{t.assignees.join(", ")}</p>}
                           {scope && (
                             <p className="inline-flex items-center gap-1 text-white/25 text-xs mt-1">
                               <FileText size={11} /> {scope}
@@ -371,21 +374,36 @@ export function DemandasPage() {
               placeholder="O que a pessoa responsável precisa fazer"
             />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Responsável">
-              <SelectInput value={form.assignee} onChange={(e) => setForm({ ...form, assignee: e.target.value })}>
-                <option value="">Selecionar</option>
-                {assigneeOptions.map((name) => (
-                  <option key={name} value={name}>
+          <Field label="Responsáveis">
+            <div className="flex flex-wrap gap-2">
+              {assigneeOptions.map((name) => {
+                const active = form.assignees.includes(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        assignees: active ? f.assignees.filter((a) => a !== name) : [...f.assignees, name],
+                      }))
+                    }
+                    className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                    style={{
+                      background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                      border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                      color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                    }}
+                  >
                     {name}
-                  </option>
-                ))}
-              </SelectInput>
-            </Field>
-            <Field label="Prazo">
-              <TextInput type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
-            </Field>
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+          <Field label="Prazo">
+            <TextInput type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+          </Field>
           <Field label="Status">
             <SelectInput value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as TaskStatus })}>
               {COLUMNS.map((c) => (
