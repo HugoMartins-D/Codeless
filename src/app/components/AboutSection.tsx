@@ -47,7 +47,6 @@ export function AboutSection() {
               <div>
                 {/* Eyebrow */}
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-5 h-px bg-white/20" />
                   <span className="text-white/30 text-xs tracking-[0.3em] uppercase"
                     style={{ fontFamily: "'Montserrat', sans-serif" }}>Quem somos e como trabalhamos</span>
                 </div>
@@ -55,10 +54,10 @@ export function AboutSection() {
                 <p className="text-white/60 text-base leading-relaxed max-w-xl"
                   style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   Criamos{" "}
-                  <span className="text-white font-semibold">sites exclusivos</span>{" "}
-                  com a identidade da sua empresa, fortalecendo sua presença
-                  no mercado e impulsionando sua{" "}
-                  <span style={{ color: "#e93e8f" }} className="font-semibold">marca</span>.
+                  <span className="text-white font-semibold">sites pensados para a realidade da sua empresa</span>,
+                  unindo estratégia, design e desenvolvimento para construir uma presença digital que
+                  alcance o{" "}
+                  <span style={{ color: "#e93e8f" }} className="font-semibold">objetivo do seu negócio</span>.
                 </p>
               </div>
 
@@ -112,11 +111,17 @@ export function AboutSection() {
                   </p>
                 </div>
 
-                <p className="text-white/30 text-sm leading-relaxed mb-8"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  Nosso objetivo é transformar seu site em uma porta de entrada
-                  para novas oportunidades de negócio.
-                </p>
+                <div className="mb-8">
+                  <p className="text-white text-base mb-2"
+                    style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
+                    Seu site precisa ter um propósito.
+                  </p>
+                  <p className="text-white/30 text-sm leading-relaxed"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                    Estruturamos cada projeto para comunicar sua marca, facilitar a experiência
+                    e conduzir o visitante para o próximo passo.
+                  </p>
+                </div>
 
                 <button
                   onClick={() => window.open("https://wa.me/5547996258977", "_blank")}

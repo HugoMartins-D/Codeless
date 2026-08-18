@@ -7,7 +7,6 @@ import { SolutionsSection } from "./components/SolutionsSection";
 import { AboutSection } from "./components/AboutSection";
 import { FounderSection } from "./components/FounderSection";
 import { VendorSection } from "./components/VendorSection";
-import { ProofSection } from "./components/ProofSection";
 import { PartnerSection } from "./components/PartnerSection";
 import { FaqSection } from "./components/FaqSection";
 import { CtaSection } from "./components/CtaSection";
@@ -57,7 +56,6 @@ export default function App() {
         <AboutSection />
         <FounderSection />
         <VendorSection />
-        <ProofSection />
         <PartnerSection />
         <FaqSection />
         <CtaSection />

@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "O site é feito do zero ou usa templates prontos?",
-    a: "Cada projeto é desenhado do zero, pensado para a identidade da sua marca — sem templates genéricos.",
+    a: "Cada projeto é desenhado do zero, pensado para a identidade da sua marca, sem templates genéricos.",
   },
   {
     q: "Como funciona o primeiro contato?",
