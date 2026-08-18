@@ -1,10 +1,11 @@
 import { useMemo } from "react";
+import { Users, FileText, KanbanSquare } from "lucide-react";
 import { useSupabaseTable } from "../lib/supabaseData";
-import { fromTaskRow, toTaskRow, fromTransactionRow, toTransactionRow } from "../lib/mappers";
+import { fromTaskRow, toTaskRow, fromTransactionRow, toTransactionRow, fromClientRow, toClientRow, fromContractRow, toContractRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
-import type { Task, Transaction } from "../types";
+import type { Client, Contract, Task, Transaction } from "../types";
 import { Panel, Badge, StatCard } from "../ui/primitives";
-import { ACCENT, currency, headingFont } from "../ui/tokens";
+import { ACCENT, currency, headingFont, monthKey, monthLabelFull } from "../ui/tokens";
 
 const statusTone = { todo: "neutral", doing: "warn", done: "accent" } as const;
 const statusLabel = { todo: "A fazer", doing: "Em andamento", done: "Concluído" } as const;
@@ -12,8 +13,16 @@ const statusLabel = { todo: "A fazer", doing: "Em andamento", done: "Concluído"
 export function DashboardPage() {
   const [tasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
   const [transactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
+  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
 
   const summary = useMemo(() => computeFinanceSummary(transactions), [transactions]);
+
+  const clientesAtivos = useMemo(() => clients.filter((c) => c.status === "ativo").length, [clients]);
+
+  const contratosEmAberto = useMemo(() => contracts.filter((c) => c.status !== "assinado").length, [contracts]);
+
+  const demandasEmAberto = useMemo(() => tasks.filter((t) => t.status !== "done").length, [tasks]);
 
   const upcoming = useMemo(
     () =>
@@ -39,15 +48,22 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-white text-2xl mb-6" style={headingFont}>
-        Dashboard geral
+      <h1 className="text-white text-2xl mb-1" style={headingFont}>
+        Geral
       </h1>
+      <p className="text-white/40 text-xs mb-6">Visão consolidada do negócio em {monthLabelFull(monthKey(new Date()))}</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <StatCard label="Lucro do mês" value={currency(summary.lucroMes)} />
         <StatCard label="Receitas do mês" value={currency(summary.totalReceitasMes)} />
         <StatCard label="Despesas do mês" value={currency(summary.totalDespesasMes)} />
         <StatCard label="Saldo em caixa" value={currency(summary.saldoEmCaixa)} />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <StatCard label="Clientes ativos" value={String(clientesAtivos)} icon={Users} tone="accent" />
+        <StatCard label="Contratos em aberto" value={String(contratosEmAberto)} icon={FileText} tone="warn" />
+        <StatCard label="Demandas em aberto" value={String(demandasEmAberto)} icon={KanbanSquare} tone="neutral" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
