@@ -76,7 +76,8 @@ export function ClientesPage() {
           name: r.nome,
           contact: r.contato ?? "",
           status: (STATUSES as string[]).includes(r.status) ? (r.status as ClientStatus) : "prospect",
-          recurringValue: r.valorrecorrente ? Number(r.valorrecorrente) : undefined,
+          billingType: r.tipocobranca === "unico" ? "unico" : "recorrente",
+          value: r.valor || r.valorrecorrente ? Number(r.valor || r.valorrecorrente) : undefined,
         }));
       setClients((prev) => [...imported, ...prev]);
     });
@@ -100,7 +101,9 @@ export function ClientesPage() {
         </div>
       </div>
 
-      <p className="text-white/30 text-xs mb-4">CSV com colunas: nome, contato, status (ativo/pausado/prospect/ex-cliente), valorrecorrente.</p>
+      <p className="text-white/30 text-xs mb-4">
+        CSV com colunas: nome, contato, status (ativo/pausado/prospect/ex-cliente), tipocobranca (recorrente/unico), valor.
+      </p>
 
       <div className="flex gap-2 mb-6">
         {(["todos", ...STATUSES] as const).map((s) => (
@@ -128,7 +131,12 @@ export function ClientesPage() {
                 <span className="text-white/70 text-sm truncate">{c.name}</span>
                 <span className="text-white/30 text-xs truncate">{c.contact}</span>
               </button>
-              {c.recurringValue != null && <span className="text-white/40 text-xs shrink-0">{currency(c.recurringValue)}/mês</span>}
+              {c.value != null && (
+                <span className="text-white/40 text-xs shrink-0">
+                  {currency(c.value)}
+                  {c.billingType === "unico" ? " (único)" : "/mês"}
+                </span>
+              )}
               <Badge tone={statusTone[c.status]}>{c.status}</Badge>
               <button onClick={() => remove(c.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors opacity-0 group-hover:opacity-100 shrink-0">
                 <Trash2 size={14} />

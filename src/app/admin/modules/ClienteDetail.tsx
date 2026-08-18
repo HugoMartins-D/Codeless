@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { X, AlertTriangle } from "lucide-react";
 import { uid } from "../lib/storage";
 import { CLIENT_STATUS_REASON_PRESETS } from "../lib/clientStatus";
-import type { Client, ClientStatus, ClientStatusHistoryEntry, Contract, ContractStatus, Transaction } from "../types";
+import type { Client, ClientBillingType, ClientStatus, ClientStatusHistoryEntry, Contract, ContractStatus, Transaction } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
 import { ACCENT, DANGER, currency, headingFont, parseDecimal } from "../ui/tokens";
 
@@ -44,7 +44,8 @@ export function ClienteDetail({
     name: initial?.name ?? "",
     contact: initial?.contact ?? "",
     status: initial?.status ?? ("prospect" as ClientStatus),
-    recurringValue: initial?.recurringValue ? String(initial.recurringValue) : "",
+    billingType: initial?.billingType ?? ("recorrente" as ClientBillingType),
+    value: initial?.value ? String(initial.value) : "",
   });
   const [reasonPreset, setReasonPreset] = useState("");
   const [reasonNote, setReasonNote] = useState("");
@@ -80,13 +81,14 @@ export function ClienteDetail({
     if (!form.name.trim()) return;
     if (needsReason && !reasonPreset) return;
 
-    const recurringValue = form.recurringValue ? parseDecimal(form.recurringValue) : undefined;
+    const value = form.value ? parseDecimal(form.value) : undefined;
     const client: Client = {
       id: initial?.id ?? uid(),
       name: form.name,
       contact: form.contact,
       status: form.status,
-      recurringValue,
+      billingType: form.billingType,
+      value,
     };
     const historyEntry: ClientStatusHistoryEntry | null = needsReason
       ? {
@@ -124,20 +126,42 @@ export function ClienteDetail({
               <Field label="Contato">
                 <TextInput value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} placeholder="Telefone, e-mail..." />
               </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Status">
-                  <SelectInput value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as ClientStatus })}>
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Field>
-                <Field label="Valor recorrente (R$)">
-                  <TextInput value={form.recurringValue} onChange={(e) => setForm({ ...form, recurringValue: e.target.value })} inputMode="decimal" />
-                </Field>
-              </div>
+              <Field label="Status">
+                <SelectInput value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as ClientStatus })}>
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </SelectInput>
+              </Field>
+
+              <Field label="Cobrança">
+                <div className="flex gap-2">
+                  {(["recorrente", "unico"] as ClientBillingType[]).map((type) => {
+                    const active = form.billingType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setForm({ ...form, billingType: type })}
+                        className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                        style={{
+                          background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                          border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                          color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                        }}
+                      >
+                        {type === "recorrente" ? "Recorrente (mensal)" : "Pagamento único"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
+
+              <Field label={form.billingType === "unico" ? "Valor único (R$)" : "Valor mensal (R$)"}>
+                <TextInput value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} inputMode="decimal" />
+              </Field>
 
               {needsReason && (
                 <div className="rounded-lg p-4 flex flex-col gap-4" style={{ background: "rgba(233,62,143,0.06)", border: "1px solid rgba(233,62,143,0.25)" }}>
@@ -218,12 +242,19 @@ export function ClienteDetail({
               ) : (
                 <div className="flex flex-col">
                   {clientContracts.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-white/5 last:border-0">
-                      <span className="text-white/60 text-sm truncate">{c.projectObject || c.clientCompanyName}</span>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <Badge tone={contractStatusTone[c.status]}>{c.status}</Badge>
-                        <span className="text-white/40 text-xs">{c.createdAt}</span>
+                    <div key={c.id} className="py-3 border-b border-white/5 last:border-0">
+                      <div className="flex items-center justify-between gap-3 mb-1.5">
+                        <span className="text-white/70 text-sm font-medium">{c.clientCompanyName}</span>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <Badge tone={contractStatusTone[c.status]}>{c.status}</Badge>
+                          <span className="text-white/40 text-xs">{c.createdAt}</span>
+                        </div>
                       </div>
+                      {c.projectObject && <p className="text-white/50 text-sm mb-1.5">{c.projectObject}</p>}
+                      <p className="text-white/30 text-xs">
+                        {currency(c.implementationValue)} implantação
+                        {c.monthlyValue > 0 && ` · ${currency(c.monthlyValue)}/mês`}
+                      </p>
                     </div>
                   ))}
                 </div>

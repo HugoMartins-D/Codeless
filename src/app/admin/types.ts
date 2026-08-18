@@ -43,12 +43,17 @@ export interface Contract {
 
 export type ClientStatus = "ativo" | "pausado" | "prospect" | "ex-cliente";
 
+/** "recorrente" = cobrança mensal; "unico" = pagamento único (ex: LP avulsa). */
+export type ClientBillingType = "recorrente" | "unico";
+
 export interface Client {
   id: string;
   name: string;
   contact: string;
   status: ClientStatus;
-  recurringValue?: number;
+  billingType?: ClientBillingType;
+  /** Valor mensal (se recorrente) ou valor total (se único). */
+  value?: number;
 }
 
 /**
