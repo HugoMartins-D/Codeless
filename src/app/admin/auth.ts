@@ -9,7 +9,14 @@ export async function signIn(email: string, password: string): Promise<string | 
 
 /** Retorna null+precisaConfirmar quando o cadastro exige confirmação por e-mail (sem sessão ainda). */
 export async function signUp(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    // sem isso, o link do e-mail de confirmação cai no "Site URL" configurado
+    // no dashboard do Supabase (que pode estar apontando pro localhost de dev),
+    // não importa de onde a pessoa realmente se cadastrou.
+    options: { emailRedirectTo: `${window.location.origin}/admin` },
+  });
   if (error) return { error: error.message, needsConfirmation: false };
   return { error: null, needsConfirmation: !data.session };
 }
