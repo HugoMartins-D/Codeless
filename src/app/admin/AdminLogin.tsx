@@ -1,19 +1,23 @@
 import { useState, type FormEvent } from "react";
 import { Lock } from "lucide-react";
-import { tryAdminLogin } from "./auth";
+import { signIn } from "./auth";
 
-export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
+export function AdminLogin() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (tryAdminLogin(password)) {
-      onSuccess();
-    } else {
-      setError(true);
+    setLoading(true);
+    const message = await signIn(email, password);
+    setLoading(false);
+    if (message) {
+      setError("E-mail ou senha incorretos.");
       setPassword("");
     }
+    // login bem-sucedido: onAuthChange no AdminApp cuida da transição de tela
   }
 
   return (
@@ -39,15 +43,31 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         >
           Painel interno
         </h1>
-        <p className="text-white/40 text-sm mb-6">Acesso restrito. Digite a senha para continuar.</p>
+        <p className="text-white/40 text-sm mb-6">Acesso restrito. Entre com sua conta para continuar.</p>
 
         <input
-          type="password"
+          type="email"
           autoFocus
+          autoComplete="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setError(null);
+          }}
+          placeholder="E-mail"
+          className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-3 placeholder:text-white/30"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
+          }}
+        />
+        <input
+          type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
-            setError(false);
+            setError(null);
           }}
           placeholder="Senha"
           className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-2 placeholder:text-white/30"
@@ -56,11 +76,12 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
             border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
           }}
         />
-        {error && <p className="text-[#e93e8f] text-xs mb-4">Senha incorreta.</p>}
+        {error && <p className="text-[#e93e8f] text-xs mb-4">{error}</p>}
 
         <button
           type="submit"
-          className="w-full mt-4 rounded-lg py-3 text-sm tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]"
+          disabled={loading}
+          className="w-full mt-4 rounded-lg py-3 text-sm tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
           style={{
             fontFamily: "'Montserrat', sans-serif",
             fontWeight: 700,
@@ -69,7 +90,7 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
             color: "#c7d300",
           }}
         >
-          ENTRAR
+          {loading ? "ENTRANDO..." : "ENTRAR"}
         </button>
       </form>
     </div>

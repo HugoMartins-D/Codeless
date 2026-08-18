@@ -1,14 +1,9 @@
 import { NavLink, Outlet } from "react-router";
 import { LogOut } from "lucide-react";
 import { adminModules } from "./modules";
-import { adminLogout } from "./auth";
+import { signOut } from "./auth";
 
-export function AdminLayout({ onLogout }: { onLogout: () => void }) {
-  function handleLogout() {
-    adminLogout();
-    onLogout();
-  }
-
+export function AdminLayout() {
   return (
     <div className="min-h-screen flex bg-[#050505]">
       <aside
@@ -47,7 +42,7 @@ export function AdminLayout({ onLogout }: { onLogout: () => void }) {
         </nav>
 
         <button
-          onClick={handleLogout}
+          onClick={() => signOut()}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-[#e93e8f] transition-colors"
         >
           <LogOut size={16} />

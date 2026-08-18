@@ -1,17 +1,21 @@
-/** Gate simples para uso local. Troque a senha abaixo quando quiser. */
-const ADMIN_PASSWORD = "codeless2026";
-const AUTH_KEY = "codeless_admin_auth";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "./lib/supabaseClient";
 
-export function isAdminAuthenticated(): boolean {
-  return localStorage.getItem(AUTH_KEY) === "true";
+export async function signIn(email: string, password: string): Promise<string | null> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return error ? error.message : null;
 }
 
-export function tryAdminLogin(password: string): boolean {
-  if (password !== ADMIN_PASSWORD) return false;
-  localStorage.setItem(AUTH_KEY, "true");
-  return true;
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut();
 }
 
-export function adminLogout(): void {
-  localStorage.removeItem(AUTH_KEY);
+export async function getSession(): Promise<Session | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session;
+}
+
+export function onAuthChange(callback: (session: Session | null) => void): () => void {
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session));
+  return () => data.subscription.unsubscribe();
 }
