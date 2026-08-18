@@ -5,7 +5,7 @@ import { fromContractRow, toContractRow, fromClientRow, toClientRow } from "../l
 import { DEFAULT_TEMPLATE, DEFAULT_TEAM_ROSTER, generateContractText, downloadTextFile } from "../lib/contract";
 import type { Client, Contract, ContractSignatory, ContractStatus } from "../types";
 import { ContractEditor } from "./ContractEditor";
-import { Panel, SelectInput, TextArea, Button, Badge, StatCard } from "../ui/primitives";
+import { Panel, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
 import { currency, headingFont, monthKey, monthLabelFull } from "../ui/tokens";
 
 const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
@@ -16,7 +16,7 @@ const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
 
 export function ContratosPage() {
   const [contracts, setContracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
-  const [template, setTemplate] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
+  const [template] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
   const [roster, setRoster] = useSupabaseSetting<ContractSignatory[]>("contratos_equipe", DEFAULT_TEAM_ROSTER);
   const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
 
@@ -140,16 +140,6 @@ export function ContratosPage() {
             </div>
           ))}
         </div>
-      </Panel>
-
-      <Panel>
-        <p className="text-white/50 text-[11px] tracking-widest uppercase mb-3">Template do contrato</p>
-        <TextArea rows={6} value={template} onChange={(e) => setTemplate(e.target.value)} className="text-xs font-mono" />
-        <p className="text-white/30 text-xs mt-2 leading-relaxed">
-          Placeholders: {"{{contratante_nome}}"} {"{{contratante_cnpj}}"} {"{{contratante_endereco}}"} {"{{contratante_representante}}"}{" "}
-          {"{{projeto_objeto}}"} {"{{valor_implantacao}}"} {"{{data_vencimento_implantacao}}"} {"{{valor_mensal}}"} {"{{dia_vencimento_mensal}}"}{" "}
-          {"{{contratados_qualificacao}}"} {"{{contratados_assinaturas}}"} {"{{cidade}}"} {"{{data_assinatura}}"}
-        </p>
       </Panel>
 
       {editorOpen && (
