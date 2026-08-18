@@ -6,14 +6,14 @@ const items = [
     num: "01",
     color: "#c7d300",
     title: "Com ou Sem Código",
-    desc: "Você escolhe o tipo de desenvolvimento. Flexibilidade total — do no-code ao código puro.",
+    desc: "Você escolhe o tipo de desenvolvimento. Flexibilidade total, do no-code ao código puro.",
     tags: ["No-code", "React", "Next.js"],
   },
   {
     num: "02",
     color: "#5252A8",
     title: "Layouts Autorais",
-    desc: "Focados na sua identidade visual. Nenhum template pronto — cada pixel pensado para a sua marca.",
+    desc: "Focados na sua identidade visual. Nenhum template pronto: cada pixel pensado para a sua marca.",
     tags: ["UI/UX", "Branding", "Design"],
   },
   {
@@ -202,11 +202,15 @@ export function FeaturesSection() {
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15 }}
             className="flex-1 flex flex-col justify-end"
           >
+            <p className="text-white/40 text-sm leading-relaxed mb-4"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              Criamos <span className="text-white/70 font-semibold">sites exclusivos</span> e oferecemos{" "}
+              <span style={{ color: "#c7d300" }} className="font-semibold">suporte</span> antes, durante e depois da entrega.
+            </p>
             <p className="text-white/40 text-sm leading-relaxed mb-8"
               style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Criamos <span className="text-white/70 font-semibold">sites exclusivos</span> e os entregamos com{" "}
-              <span style={{ color: "#c7d300" }} className="font-semibold">suporte real</span>, garantindo que sua presença digital{" "}
-              <span className="text-white/70 font-semibold">impulsione sua marca</span>.
+              O projeto não termina quando o site vai ao ar. Continuamos ao seu lado para apoiar,
+              ajustar e evoluir o que foi construído.
             </p>
             <button
               onClick={() => window.open("https://wa.me/5547996258977", "_blank")}

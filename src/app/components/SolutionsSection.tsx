@@ -19,7 +19,7 @@ export function SolutionsSection() {
             fontFamily: "'Montserrat', sans-serif", fontWeight: 900,
             fontSize: "clamp(2.2rem,4.5vw,3.5rem)", letterSpacing: "-0.02em",
           }}>
-            Três soluções. <span style={{ color: "#e93e8f" }}>Um único objetivo:</span> resultado.
+            Três soluções. <span style={{ color: "#e93e8f" }}>Um único objetivo:</span> Resultado.
           </h2>
         </motion.div>
 

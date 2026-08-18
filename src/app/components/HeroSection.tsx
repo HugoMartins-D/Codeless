@@ -54,12 +54,10 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
           className="flex items-center justify-center gap-4 mb-10"
         >
-          <span className="w-10 h-px bg-white/15 hidden sm:block" />
           <span className="text-white/35 text-[11px] tracking-[0.3em] uppercase whitespace-nowrap"
             style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600 }}>
-            Soluções digitais para empresas &nbsp;—&nbsp; 2026
+            Soluções digitais para empresas &nbsp;·&nbsp; 2026
           </span>
-          <span className="w-10 h-px bg-white/15 hidden sm:block" />
         </motion.div>
 
         {/* Headline */}

@@ -69,18 +69,20 @@ export function FounderSection() {
             {/* ── Middle text ── */}
             <div className="p-6 md:p-8 flex flex-col justify-center border-t lg:border-t-0 lg:border-l lg:border-r border-white/6">
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-5 h-px bg-white/20" />
                 <span className="text-white/30 text-xs tracking-[0.3em] uppercase"
                   style={{ fontFamily: "'Montserrat', sans-serif" }}>Quem está por trás</span>
               </div>
               <h3 className="text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "1.6rem" }}>
                 Do briefing ao deploy, com o time certo
               </h3>
-              <p className="text-white/40 text-sm leading-relaxed"
+              <p className="text-white/40 text-sm leading-relaxed mb-3"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Todo projeto passa pela minha mão — e pela mão de devs
-                competentes, acionados conforme o serviço exige. Curadoria
-                de ponta a ponta, sem abrir mão da qualidade em nenhuma etapa.
+                Cada projeto é acompanhado por mim, que coordeno as etapas e, quando necessário,
+                conto com desenvolvedores especializados de acordo com as necessidades do projeto.
+              </p>
+              <p className="text-white font-semibold text-sm leading-relaxed"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                Uma estrutura flexível, mas com o mesmo cuidado em cada etapa.
               </p>
             </div>
 
