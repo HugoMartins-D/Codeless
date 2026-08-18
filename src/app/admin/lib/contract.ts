@@ -1,13 +1,8 @@
-import type { Contract } from "../types";
+import type { Contract, ContractSignatory } from "../types";
 import { currency } from "../ui/tokens";
 
-export interface TeamMember {
-  name: string;
-  cpf: string;
-}
-
-/** Sócios que podem constar como CONTRATADOS. Atualize aqui se o time mudar. */
-export const TEAM_ROSTER: TeamMember[] = [
+/** Lista inicial de sugestões ao criar um contrato — editável depois pela tela de Contratos. */
+export const DEFAULT_TEAM_ROSTER: ContractSignatory[] = [
   { name: "Renan Regis", cpf: "122.028.799.78" },
   { name: "Luan Regis", cpf: "122.028.829-28" },
   { name: "Hugo Vinicius Martins da Silva", cpf: "101.157.809-39" },
@@ -152,14 +147,12 @@ Representante Legal
 
 {{contratados_assinaturas}}`;
 
-function qualificacaoBlock(signatories: string[]): string {
-  const members = TEAM_ROSTER.filter((m) => signatories.includes(m.name));
-  return members.map((m) => `${m.name.toUpperCase()}, inscrito no CPF nº ${m.cpf};`).join("\n\n");
+function qualificacaoBlock(signatories: ContractSignatory[]): string {
+  return signatories.map((m) => `${m.name.toUpperCase()}, inscrito no CPF nº ${m.cpf};`).join("\n\n");
 }
 
-function assinaturasBlock(signatories: string[]): string {
-  const members = TEAM_ROSTER.filter((m) => signatories.includes(m.name));
-  return members
+function assinaturasBlock(signatories: ContractSignatory[]): string {
+  return signatories
     .map(
       (m) =>
         `CONTRATADOS:\n\n____________________________________________\n${m.name}\nCPF nº ${m.cpf}`,

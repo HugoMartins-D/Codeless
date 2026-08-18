@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Plus, Trash2, Copy, Download } from "lucide-react";
+import { Plus, Trash2, Copy, Download, X as XIcon } from "lucide-react";
 import { uid } from "../lib/storage";
 import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
 import { fromContractRow, toContractRow } from "../lib/mappers";
-import { DEFAULT_TEMPLATE, TEAM_ROSTER, generateContractText, downloadTextFile } from "../lib/contract";
-import type { Contract, ContractStatus } from "../types";
+import { DEFAULT_TEMPLATE, DEFAULT_TEAM_ROSTER, generateContractText, downloadTextFile } from "../lib/contract";
+import type { Contract, ContractSignatory, ContractStatus } from "../types";
 import { Panel, Field, TextInput, SelectInput, TextArea, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { currency, headingFont } from "../ui/tokens";
@@ -19,7 +19,7 @@ const emptyForm = {
   implementationDueDate: "",
   monthlyValue: "",
   monthlyDueDay: "25",
-  signatories: [] as string[],
+  signatoryNames: [] as string[],
   city: "Balneário Camboriú",
 };
 
@@ -32,6 +32,8 @@ const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
 export function ContratosPage() {
   const [contracts, setContracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
   const [template, setTemplate] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
+  const [roster, setRoster] = useSupabaseSetting<ContractSignatory[]>("contratos_equipe", DEFAULT_TEAM_ROSTER);
+  const [newMember, setNewMember] = useState({ name: "", cpf: "" });
 
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -41,14 +43,28 @@ export function ContratosPage() {
   function toggleSignatory(name: string) {
     setForm((f) => ({
       ...f,
-      signatories: f.signatories.includes(name) ? f.signatories.filter((s) => s !== name) : [...f.signatories, name],
+      signatoryNames: f.signatoryNames.includes(name) ? f.signatoryNames.filter((s) => s !== name) : [...f.signatoryNames, name],
     }));
+  }
+
+  function addRosterMember() {
+    const name = newMember.name.trim();
+    const cpf = newMember.cpf.trim();
+    if (!name || !cpf || roster.some((m) => m.name === name)) return;
+    setRoster([...roster, { name, cpf }]);
+    setNewMember({ name: "", cpf: "" });
+  }
+
+  function removeRosterMember(name: string) {
+    setRoster(roster.filter((m) => m.name !== name));
+    setForm((f) => ({ ...f, signatoryNames: f.signatoryNames.filter((s) => s !== name) }));
   }
 
   function submit() {
     const implementationValue = Number(form.implementationValue.replace(",", "."));
     const monthlyValue = Number(form.monthlyValue.replace(",", "."));
-    if (!form.clientCompanyName || !implementationValue || form.signatories.length === 0) return;
+    const signatories = roster.filter((m) => form.signatoryNames.includes(m.name));
+    if (!form.clientCompanyName || !implementationValue || signatories.length === 0) return;
 
     const contract: Contract = {
       id: uid(),
@@ -61,7 +77,7 @@ export function ContratosPage() {
       implementationDueDate: form.implementationDueDate || undefined,
       monthlyValue,
       monthlyDueDay: Number(form.monthlyDueDay) || 25,
-      signatories: form.signatories,
+      signatories,
       city: form.city,
       status: "rascunho",
       createdAt: new Date().toISOString().slice(0, 10),
@@ -185,15 +201,14 @@ export function ContratosPage() {
 
           <div>
             <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Quem vai trabalhar e assinar o contrato</p>
-            <div className="flex flex-wrap gap-2">
-              {TEAM_ROSTER.map((m) => {
-                const active = form.signatories.includes(m.name);
+            <div className="flex flex-wrap gap-2 mb-3">
+              {roster.map((m) => {
+                const active = form.signatoryNames.includes(m.name);
                 return (
-                  <button
+                  <span
                     key={m.name}
-                    type="button"
                     onClick={() => toggleSignatory(m.name)}
-                    className="px-3 py-1.5 rounded-full text-xs transition-colors"
+                    className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-full text-xs transition-colors cursor-pointer"
                     style={{
                       background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
                       border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
@@ -201,9 +216,35 @@ export function ContratosPage() {
                     }}
                   >
                     {m.name}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeRosterMember(m.name);
+                      }}
+                      className="text-white/20 hover:text-[#e93e8f]"
+                    >
+                      <XIcon size={11} />
+                    </button>
+                  </span>
                 );
               })}
+            </div>
+            <div className="flex gap-2">
+              <TextInput
+                placeholder="Nome"
+                value={newMember.name}
+                onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                className="!py-1.5"
+              />
+              <TextInput
+                placeholder="CPF"
+                value={newMember.cpf}
+                onChange={(e) => setNewMember({ ...newMember, cpf: e.target.value })}
+                onKeyDown={(e) => e.key === "Enter" && addRosterMember()}
+                className="!py-1.5 !w-40"
+              />
+              <Button onClick={addRosterMember}>Add</Button>
             </div>
           </div>
 

@@ -12,6 +12,11 @@ export interface Transaction {
 
 export type ContractStatus = "rascunho" | "enviado" | "assinado";
 
+export interface ContractSignatory {
+  name: string;
+  cpf: string;
+}
+
 export interface Contract {
   id: string;
   clientCompanyName: string;
@@ -23,7 +28,8 @@ export interface Contract {
   implementationDueDate?: string; // yyyy-mm-dd, opcional
   monthlyValue: number;
   monthlyDueDay: number; // dia do mês, ex: 25
-  signatories: string[]; // nomes selecionados do roster fixo de contratados
+  /** Nome+CPF travados no momento da criação — não muda se o time (roster) mudar depois. */
+  signatories: ContractSignatory[];
   city: string;
   status: ContractStatus;
   createdAt: string; // yyyy-mm-dd
