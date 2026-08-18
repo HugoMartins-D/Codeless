@@ -15,6 +15,8 @@ export type ContractStatus = "rascunho" | "enviado" | "assinado";
 export interface ContractSignatory {
   name: string;
   cpf: string;
+  /** Função que a pessoa exerce (ex: Desenvolvedor, Designer) — opcional. */
+  role?: string;
 }
 
 export interface Contract {
