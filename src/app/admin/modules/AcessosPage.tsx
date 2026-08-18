@@ -5,9 +5,12 @@ import { useSupabaseTable } from "../lib/supabaseData";
 import { fromCollaboratorRow, toCollaboratorRow, fromClientRow, toClientRow } from "../lib/mappers";
 import type { Client, Collaborator } from "../types";
 import { adminModules } from "../modules";
-import { Panel, Field, TextInput, Button } from "../ui/primitives";
+import { ADMIN_EMAIL, GRANTABLE_MODULES } from "../lib/access";
+import { Panel, Field, TextInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { headingFont } from "../ui/tokens";
+
+const grantableModules = adminModules.filter((m) => (GRANTABLE_MODULES as readonly string[]).includes(m.slug));
 
 const emptyForm = { name: "", email: "" };
 
@@ -64,8 +67,8 @@ export function AcessosPage() {
         </Button>
       </div>
       <p className="text-white/30 text-xs mb-6">
-        Isso define o que cada pessoa deve ver — hoje o painel usa uma senha única, então essas permissões ainda não são aplicadas
-        automaticamente no login. Serve para já deixar mapeado para quando o time tiver acesso individual.
+        {ADMIN_EMAIL} é o administrador e sempre tem acesso total — não aparece nessa lista. Quando alguém cria uma conta no
+        login, ela entra aqui automaticamente como pendente, sem nenhuma aba liberada, até você marcar o que essa pessoa pode ver.
       </p>
 
       {collaborators.length === 0 && (
@@ -78,9 +81,12 @@ export function AcessosPage() {
         {collaborators.map((c) => (
           <Panel key={c.id}>
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-white text-sm font-medium">{c.name}</p>
-                {c.email && <p className="text-white/30 text-xs">{c.email}</p>}
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-white text-sm font-medium">{c.name}</p>
+                  {c.email && <p className="text-white/30 text-xs">{c.email}</p>}
+                </div>
+                {c.moduleAccess.length === 0 && <Badge tone="warn">pendente</Badge>}
               </div>
               <button onClick={() => remove(c.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors">
                 <Trash2 size={14} />
@@ -89,7 +95,7 @@ export function AcessosPage() {
 
             <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">Abas visíveis</p>
             <div className="flex flex-wrap gap-2 mb-4">
-              {adminModules.map((m) => {
+              {grantableModules.map((m) => {
                 const active = c.moduleAccess.includes(m.slug);
                 return (
                   <button
