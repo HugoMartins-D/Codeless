@@ -10,11 +10,10 @@ import { Panel, Field, TextInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { headingFont } from "../ui/tokens";
 
-const grantableModules = adminModules.filter((m) => (GRANTABLE_MODULES as readonly string[]).includes(m.slug));
-
 const emptyForm = { name: "", email: "" };
 
 export function AcessosPage() {
+  const grantableModules = adminModules.filter((m) => (GRANTABLE_MODULES as readonly string[]).includes(m.slug));
   const [collaborators, setCollaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
   const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
 
