@@ -4,7 +4,8 @@ import { useLocalStorage, uid } from "../lib/storage";
 import { useSupabaseTable } from "../lib/supabaseData";
 import { fromTaskRow, toTaskRow, fromClientRow, toClientRow, fromCollaboratorRow, toCollaboratorRow } from "../lib/mappers";
 import type { Client, Collaborator, Task, TaskStatus } from "../types";
-import { ADMIN_EMAIL } from "../lib/access";
+import { ADMIN_EMAIL, useMyAccess } from "../lib/access";
+import { useSession } from "../auth";
 import { Panel, Field, TextInput, TextArea, SelectInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { headingFont } from "../ui/tokens";
@@ -24,6 +25,7 @@ const statusTone: Record<TaskStatus, "neutral" | "warn" | "accent"> = {
 const emptyForm = { title: "", client: "", description: "", assignee: "", dueDate: "", status: "todo" as TaskStatus, deliverableUrl: "" };
 
 export function DemandasPage() {
+  const access = useMyAccess(useSession() ?? null);
   const [tasks, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
   const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
   const [collaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
@@ -115,9 +117,11 @@ export function DemandasPage() {
               <KanbanSquare size={13} /> Kanban
             </button>
           </div>
-          <Button variant="primary" onClick={openNew} className="inline-flex items-center gap-1.5">
-            <Plus size={14} /> Nova demanda
-          </Button>
+          {access.canCreateDemandas && (
+            <Button variant="primary" onClick={openNew} className="inline-flex items-center gap-1.5">
+              <Plus size={14} /> Nova demanda
+            </Button>
+          )}
         </div>
       </div>
 

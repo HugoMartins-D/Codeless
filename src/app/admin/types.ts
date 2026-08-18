@@ -71,4 +71,6 @@ export interface Collaborator {
   status: CollaboratorStatus;
   moduleAccess: string[]; // slugs de admin/modules.ts
   clientAccess: "all" | string[]; // ids de Client, ou "all"
+  /** Além de ter acesso ao módulo Demandas, pode criar novas demandas (não só ver/atualizar as suas). */
+  canCreateDemandas: boolean;
 }
