@@ -1,7 +1,31 @@
-import { Clock } from "lucide-react";
+import { Clock, Ban, CheckCircle2 } from "lucide-react";
 import { signOut } from "./auth";
+import type { CollaboratorStatus } from "./types";
 
-export function AdminPending({ email }: { email: string }) {
+const copy: Record<CollaboratorStatus, { icon: typeof Clock; color: string; title: string; lines: string[] }> = {
+  pending: {
+    icon: Clock,
+    color: "#f5c400",
+    title: "Aguardando liberação",
+    lines: ["ainda não foi aprovada pelo administrador.", "Fale com o administrador do painel para liberar seu acesso."],
+  },
+  denied: {
+    icon: Ban,
+    color: "#e93e8f",
+    title: "Acesso negado",
+    lines: ["não tem permissão para entrar neste painel.", "Se você acha que isso é um engano, fale com o administrador."],
+  },
+  approved: {
+    icon: CheckCircle2,
+    color: "#c7d300",
+    title: "Conta aprovada",
+    lines: ["já foi aprovada, mas ainda não tem nenhuma aba liberada.", "Fale com o administrador para receber acesso às abas."],
+  },
+};
+
+export function AdminPending({ email, status }: { email: string; status: CollaboratorStatus }) {
+  const { icon: Icon, color, title, lines } = copy[status];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050505] px-6">
       <div
@@ -14,21 +38,18 @@ export function AdminPending({ email }: { email: string }) {
       >
         <div
           className="w-11 h-11 rounded-full flex items-center justify-center mb-6 mx-auto"
-          style={{ background: "rgba(245,196,0,0.10)", border: "1px solid rgba(245,196,0,0.25)" }}
+          style={{ background: `${color}1a`, border: `1px solid ${color}40` }}
         >
-          <Clock size={18} className="text-[#f5c400]" />
+          <Icon size={18} style={{ color }} />
         </div>
         <h1 className="text-white text-xl mb-2" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
-          Aguardando liberação
+          {title}
         </h1>
         <p className="text-white/40 text-sm mb-1">
-          Sua conta ({email}) foi criada, mas ainda não tem acesso a nenhuma aba.
+          Sua conta ({email}) {lines[0]}
         </p>
-        <p className="text-white/40 text-sm mb-6">Fale com o administrador do painel para liberar seu acesso.</p>
-        <button
-          onClick={() => signOut()}
-          className="text-xs text-white/30 hover:text-white/60 transition-colors"
-        >
+        <p className="text-white/40 text-sm mb-6">{lines[1]}</p>
+        <button onClick={() => signOut()} className="text-xs text-white/30 hover:text-white/60 transition-colors">
           Sair
         </button>
       </div>

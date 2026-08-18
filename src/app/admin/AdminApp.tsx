@@ -19,7 +19,7 @@ export default function AdminApp() {
   }
 
   if (!access.isAdmin && access.moduleAccess.length === 0) {
-    return <AdminPending email={session.user.email ?? ""} />;
+    return <AdminPending email={session.user.email ?? ""} status={access.status ?? "pending"} />;
   }
 
   const visibleModules = adminModules.filter((m) => {
