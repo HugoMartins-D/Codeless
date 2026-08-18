@@ -77,6 +77,8 @@ export interface Task {
   status: TaskStatus;
   /** Link do entregável (Drive, Dropbox, PDF, etc.) informado na entrega. */
   deliverableUrl?: string;
+  /** Contrato/escopo do módulo Contratos ao qual essa demanda pertence, opcional. */
+  contractId?: string;
 }
 
 export type CollaboratorStatus = "pending" | "approved" | "denied";
