@@ -72,7 +72,8 @@ export interface Task {
   client: string;
   /** O que a pessoa responsável precisa fazer. */
   description?: string;
-  assignee?: string;
+  /** Uma demanda pode ter mais de um responsável. */
+  assignees: string[];
   dueDate?: string; // yyyy-mm-dd
   status: TaskStatus;
   /** Link do entregável (Drive, Dropbox, PDF, etc.) informado na entrega. */
