@@ -3,7 +3,7 @@ import { X, Eye, EyeOff, Download, Save } from "lucide-react";
 import { uid } from "../lib/storage";
 import { generateContractText, downloadTextFile } from "../lib/contract";
 import { renderContractBlocks } from "../lib/contractFormat";
-import type { Client, Contract, ContractSignatory } from "../types";
+import type { Client, Contract, ContractSignatory, ContractStatus } from "../types";
 import { Field, TextInput, SelectInput, TextArea, Button } from "../ui/primitives";
 import { headingFont, parseDecimal } from "../ui/tokens";
 
@@ -43,6 +43,7 @@ export function ContractEditor({
   onClose: () => void;
 }) {
   const [form, setForm] = useState(formFromContract(initial));
+  const [status, setStatus] = useState<ContractStatus>(initial?.status ?? "rascunho");
   const [selectedClientId, setSelectedClientId] = useState(initial?.clientId ?? "");
   const [newMember, setNewMember] = useState({ name: "", cpf: "", role: "" });
   const [previewOpen, setPreviewOpen] = useState(true);
@@ -90,11 +91,11 @@ export function ContractEditor({
       monthlyDueDay: Number(form.monthlyDueDay) || 25,
       signatories: roster.filter((m) => form.signatoryNames.includes(m.name)),
       city: form.city,
-      status: initial?.status ?? "rascunho",
+      status,
       createdAt: initial?.createdAt ?? new Date().toISOString().slice(0, 10),
       clientId: selectedClientId || undefined,
     };
-  }, [form, roster, initial, selectedClientId]);
+  }, [form, roster, initial, selectedClientId, status]);
 
   const previewText = useMemo(() => generateContractText(template, draft), [template, draft]);
 
@@ -152,6 +153,14 @@ export function ContractEditor({
                 </SelectInput>
               </Field>
             )}
+
+            <Field label="Status">
+              <SelectInput value={status} onChange={(e) => setStatus(e.target.value as ContractStatus)}>
+                <option value="rascunho">Rascunho</option>
+                <option value="enviado">Enviado</option>
+                <option value="assinado">Assinado</option>
+              </SelectInput>
+            </Field>
 
             <div>
               <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Contratante</p>

@@ -14,6 +14,8 @@ const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
   assinado: "accent",
 };
 
+const STATUS_ORDER: ContractStatus[] = ["rascunho", "enviado", "assinado"];
+
 export function ContratosPage() {
   const [contracts, setContracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
   const [template] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
@@ -59,6 +61,16 @@ export function ContratosPage() {
 
   function remove(id: string) {
     setContracts((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function advanceStatus(id: string) {
+    setContracts((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        const nextIdx = Math.min(STATUS_ORDER.length - 1, STATUS_ORDER.indexOf(c.status) + 1);
+        return { ...c, status: STATUS_ORDER[nextIdx] };
+      }),
+    );
   }
 
   function handleQuickDownload(c: Contract) {
@@ -125,7 +137,14 @@ export function ContratosPage() {
                   </p>
                 </div>
               </div>
-              <Badge tone={statusTone[c.status]}>{c.status}</Badge>
+              <button
+                onClick={() => advanceStatus(c.id)}
+                disabled={c.status === "assinado"}
+                title={c.status === "assinado" ? "Assinado" : `Clique pra avançar para "${STATUS_ORDER[STATUS_ORDER.indexOf(c.status) + 1]}"`}
+                className="disabled:cursor-default"
+              >
+                <Badge tone={statusTone[c.status]}>{c.status}</Badge>
+              </button>
               <div className="flex items-center gap-1 shrink-0">
                 <button onClick={() => handleQuickDownload(c)} className="p-1.5 text-white/30 hover:text-white/70 transition-colors" title="Baixar">
                   <Download size={14} />
