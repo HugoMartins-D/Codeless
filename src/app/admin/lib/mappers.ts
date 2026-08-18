@@ -1,4 +1,4 @@
-import type { Client, ClientStatusHistoryEntry, Collaborator, Contract, Task, Transaction } from "../types";
+import type { Client, ClientStatusHistoryEntry, Collaborator, Contract, Profile, Task, Transaction } from "../types";
 
 export const fromTransactionRow = (r: any): Transaction => ({
   id: r.id,
@@ -134,4 +134,18 @@ export const toClientStatusHistoryRow = (h: ClientStatusHistoryEntry) => ({
   reason_preset: h.reasonPreset || null,
   reason_note: h.reasonNote || null,
   changed_at: h.changedAt,
+});
+
+export const fromProfileRow = (r: any): Profile => ({
+  id: r.id,
+  email: r.email ?? "",
+  name: r.name ?? "",
+  avatarUrl: r.avatar_url ?? undefined,
+});
+
+export const toProfileRow = (p: Profile) => ({
+  id: p.id,
+  email: p.email,
+  name: p.name,
+  avatar_url: p.avatarUrl || null,
 });

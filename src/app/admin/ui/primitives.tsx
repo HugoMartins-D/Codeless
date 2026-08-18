@@ -135,3 +135,38 @@ export function StatCard({
     </Panel>
   );
 }
+
+export function Avatar({ name, avatarUrl, size = 32 }: { name: string; avatarUrl?: string; size?: number }) {
+  const initials = (name.trim() || "?")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={name}
+        className="rounded-full object-cover shrink-0"
+        style={{ width: size, height: size, border: "1px solid rgba(255,255,255,0.12)" }}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="rounded-full flex items-center justify-center shrink-0 text-white/60"
+      style={{
+        width: size,
+        height: size,
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        fontSize: size * 0.4,
+        fontWeight: 700,
+      }}
+    >
+      {initials}
+    </div>
+  );
+}
