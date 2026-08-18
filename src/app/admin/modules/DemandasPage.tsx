@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, ArrowRight, ArrowLeft, List, KanbanSquare } from "lucide-react";
+import { Plus, Trash2, ArrowRight, ArrowLeft, List, KanbanSquare, Link as LinkIcon } from "lucide-react";
 import { useLocalStorage, uid } from "../lib/storage";
 import { useSupabaseTable } from "../lib/supabaseData";
-import { fromTaskRow, toTaskRow, fromClientRow, toClientRow } from "../lib/mappers";
-import type { Client, Task, TaskStatus } from "../types";
-import { Panel, Field, TextInput, SelectInput, Button, Badge } from "../ui/primitives";
+import { fromTaskRow, toTaskRow, fromClientRow, toClientRow, fromCollaboratorRow, toCollaboratorRow } from "../lib/mappers";
+import type { Client, Collaborator, Task, TaskStatus } from "../types";
+import { ADMIN_EMAIL } from "../lib/access";
+import { Panel, Field, TextInput, TextArea, SelectInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
 import { headingFont } from "../ui/tokens";
 
@@ -20,12 +21,18 @@ const statusTone: Record<TaskStatus, "neutral" | "warn" | "accent"> = {
   done: "accent",
 };
 
-const emptyForm = { title: "", client: "", assignee: "", dueDate: "", status: "todo" as TaskStatus };
+const emptyForm = { title: "", client: "", description: "", assignee: "", dueDate: "", status: "todo" as TaskStatus, deliverableUrl: "" };
 
 export function DemandasPage() {
   const [tasks, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
   const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const [collaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
   const [view, setView] = useLocalStorage<"lista" | "kanban">("admin_demandas_view", "lista");
+
+  const assigneeOptions = [
+    "Você (admin)",
+    ...collaborators.filter((c) => c.status === "approved" && c.email !== ADMIN_EMAIL).map((c) => c.name),
+  ];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -39,7 +46,15 @@ export function DemandasPage() {
 
   function openEdit(t: Task) {
     setEditingId(t.id);
-    setForm({ title: t.title, client: t.client, assignee: t.assignee ?? "", dueDate: t.dueDate ?? "", status: t.status });
+    setForm({
+      title: t.title,
+      client: t.client,
+      description: t.description ?? "",
+      assignee: t.assignee ?? "",
+      dueDate: t.dueDate ?? "",
+      status: t.status,
+      deliverableUrl: t.deliverableUrl ?? "",
+    });
     setModalOpen(true);
   }
 
@@ -124,6 +139,18 @@ export function DemandasPage() {
                       <span className="text-white/70 text-sm truncate">{t.title}</span>
                       {t.assignee && <span className="text-white/30 text-xs shrink-0">{t.assignee}</span>}
                     </button>
+                    {t.deliverableUrl && (
+                      <a
+                        href={t.deliverableUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[#c7d300]/70 hover:text-[#c7d300] shrink-0"
+                        title="Ver entregável"
+                      >
+                        <LinkIcon size={14} />
+                      </a>
+                    )}
                     {t.dueDate && <span className="text-white/40 text-xs shrink-0">{t.dueDate}</span>}
                     <Badge tone={statusTone[t.status]}>{COLUMNS.find((c) => c.status === t.status)?.label}</Badge>
                     <button onClick={() => remove(t.id)} className="text-white/20 hover:text-[#e93e8f] transition-colors opacity-0 group-hover:opacity-100 shrink-0">
@@ -153,6 +180,11 @@ export function DemandasPage() {
                         <p className="text-white/80 text-sm mb-1">{t.title}</p>
                         <p className="text-white/30 text-xs">{t.client || "Sem cliente"}</p>
                         {t.assignee && <p className="text-white/30 text-xs">{t.assignee}</p>}
+                        {t.deliverableUrl && (
+                          <span className="inline-flex items-center gap-1 text-[#c7d300]/70 text-xs mt-1">
+                            <LinkIcon size={11} /> entregue
+                          </span>
+                        )}
                       </button>
                       <div className="flex items-center justify-between mt-3">
                         <button
@@ -194,9 +226,24 @@ export function DemandasPage() {
               ))}
             </datalist>
           </Field>
+          <Field label="Descrição">
+            <TextArea
+              rows={3}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="O que a pessoa responsável precisa fazer"
+            />
+          </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Responsável">
-              <TextInput value={form.assignee} onChange={(e) => setForm({ ...form, assignee: e.target.value })} />
+              <SelectInput value={form.assignee} onChange={(e) => setForm({ ...form, assignee: e.target.value })}>
+                <option value="">Selecionar</option>
+                {assigneeOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </SelectInput>
             </Field>
             <Field label="Prazo">
               <TextInput type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
@@ -210,6 +257,14 @@ export function DemandasPage() {
                 </option>
               ))}
             </SelectInput>
+          </Field>
+          <Field label="Link do entregável">
+            <TextInput
+              type="url"
+              value={form.deliverableUrl}
+              onChange={(e) => setForm({ ...form, deliverableUrl: e.target.value })}
+              placeholder="https://drive.google.com/..."
+            />
           </Field>
           <div className="flex justify-end gap-2 mt-2">
             <Button onClick={() => setModalOpen(false)}>Cancelar</Button>

@@ -53,9 +53,13 @@ export interface Task {
   id: string;
   title: string;
   client: string;
+  /** O que a pessoa responsável precisa fazer. */
+  description?: string;
   assignee?: string;
   dueDate?: string; // yyyy-mm-dd
   status: TaskStatus;
+  /** Link do entregável (Drive, Dropbox, PDF, etc.) informado na entrega. */
+  deliverableUrl?: string;
 }
 
 export type CollaboratorStatus = "pending" | "approved" | "denied";
