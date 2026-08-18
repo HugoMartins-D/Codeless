@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { ACCENT, DANGER, panelStyle } from "./tokens";
 
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -74,7 +75,48 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
   );
 }
 
-export function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
+const statIconTone = {
+  neutral: "rgba(255,255,255,0.6)",
+  accent: ACCENT,
+  warn: "#f5c400",
+  danger: DANGER,
+} as const;
+
+export function StatCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  icon?: LucideIcon;
+  tone?: keyof typeof statIconTone;
+}) {
+  if (Icon) {
+    const color = statIconTone[tone];
+    return (
+      <Panel className="!p-5">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: `${color}1a`, border: `1px solid ${color}40` }}
+          >
+            <Icon size={18} style={{ color }} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-white text-xl" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }}>
+              {value}
+            </p>
+            <p className="text-white/40 text-xs truncate">{label}</p>
+          </div>
+        </div>
+      </Panel>
+    );
+  }
+
   return (
     <Panel className="!p-5">
       <p className="text-white/40 text-[11px] tracking-widest uppercase mb-2">{label}</p>
