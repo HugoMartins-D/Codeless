@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quanto tempo leva para o site ficar pronto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O prazo varia conforme o escopo do projeto. Definimos um cronograma claro logo no briefing, para você acompanhar cada etapa até a entrega."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Preciso saber programar para gerenciar o site depois?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não. O projeto é entregue com um fluxo de edição pensado para você, e explicamos tudo durante o processo de entrega."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Vocês fazem manutenção depois que o site vai ao ar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Continuamos acompanhando o projeto após o lançamento, ajustando o que for necessário conforme sua empresa cresce."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O site é feito do zero ou usa templates prontos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cada projeto é desenhado do zero, pensado para a identidade da sua marca, sem templates genéricos."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como funciona o primeiro contato?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Você fala com a gente pelo WhatsApp, entendemos sua necessidade e alinhamos escopo e prazo antes de começar."
+      }
+    }
+  ]
+}

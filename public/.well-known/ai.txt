@@ -1,0 +1,11 @@
+# ai.txt — AI discovery endpoint for CODE LESS
+# Spec discussion: https://site.spawning.ai/ai-txt
+
+Site: CODE LESS
+URL: https://codeless.com.br/
+Summary: https://codeless.com.br/ai/summary.json
+FAQ: https://codeless.com.br/ai/faq.json
+LLMs: https://codeless.com.br/llms.txt
+Sitemap: https://codeless.com.br/sitemap.xml
+
+# Crawling policy: AI citation and search bots are welcome (see /robots.txt).

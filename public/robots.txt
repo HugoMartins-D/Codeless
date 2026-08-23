@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════
+#   AI SEARCH & CITATION BOTS — Allow All
+#   GEO-Optimized robots.txt
+#   Generated via github.com/Auriti-Labs/geo-optimizer-skill
+# ═══════════════════════════════════════════════
+
+# ——— OpenAI ———
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+
+# ——— Anthropic (Claude) ———
+User-agent: anthropic-ai
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: claude-web
+Allow: /
+
+# ——— Perplexity ———
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+
+# ——— Google AI (Gemini) ———
+User-agent: Google-Extended
+Allow: /
+
+# ——— Microsoft (Copilot/Bing) ———
+User-agent: Bingbot
+Allow: /
+
+# ——— Apple (Siri/AI) ———
+User-agent: Applebot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# ——— Meta (AI) ———
+User-agent: FacebookBot
+Allow: /
+User-agent: meta-externalagent
+Allow: /
+
+# ——— ByteDance/TikTok ———
+User-agent: Bytespider
+Allow: /
+
+# ——— DuckDuckGo AI ———
+User-agent: DuckAssistBot
+Allow: /
+
+# ——— Traditional search ———
+User-agent: Googlebot
+Allow: /
+User-agent: *
+Allow: /
+
+# Block the internal admin panel from every crawler
+Disallow: /admin
+
+Sitemap: https://codeless.com.br/sitemap.xml
