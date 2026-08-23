@@ -3,6 +3,8 @@ import { FileText, Wallet, FileClock, Send, CheckCircle2, Download, Pencil, Tras
 import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
 import { fromContractRow, toContractRow, fromClientRow, toClientRow } from "../lib/mappers";
 import { DEFAULT_TEMPLATE, DEFAULT_TEAM_ROSTER, generateContractText, downloadTextFile } from "../lib/contract";
+import { allowedClientIds, useMyAccess } from "../lib/access";
+import { useSession } from "../auth";
 import type { Client, Contract, ContractSignatory, ContractStatus } from "../types";
 import { ContractEditor } from "./ContractEditor";
 import { Panel, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
@@ -17,10 +19,22 @@ const statusTone: Record<ContractStatus, "neutral" | "warn" | "accent"> = {
 const STATUS_ORDER: ContractStatus[] = ["rascunho", "enviado", "assinado"];
 
 export function ContratosPage() {
-  const [contracts, setContracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const access = useMyAccess(useSession() ?? null);
+  const clientIds = allowedClientIds(access);
+  const [contracts, setContracts] = useSupabaseTable<Contract>(
+    "contracts",
+    fromContractRow,
+    toContractRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
   const [template] = useSupabaseSetting("contratos_template", DEFAULT_TEMPLATE);
   const [roster, setRoster] = useSupabaseSetting<ContractSignatory[]>("contratos_equipe", DEFAULT_TEAM_ROSTER);
-  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const [clients] = useSupabaseTable<Client>(
+    "clients",
+    fromClientRow,
+    toClientRow,
+    clientIds ? { column: "id", values: clientIds } : null,
+  );
 
   const [selectedMonth, setSelectedMonth] = useState(() => monthKey(new Date()));
   const [editorOpen, setEditorOpen] = useState(false);

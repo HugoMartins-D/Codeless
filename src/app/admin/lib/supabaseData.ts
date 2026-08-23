@@ -7,40 +7,58 @@ function resolve<T>(updater: Updater<T>, prev: T): T {
   return typeof updater === "function" ? (updater as (p: T) => T)(prev) : updater;
 }
 
+/** Restringe a query a linhas cuja `column` esteja em `values` — usado para aplicar clientAccess no Postgres. */
+export interface TableFilter {
+  column: string;
+  values: string[];
+}
+
 /**
  * Coleção de linhas de uma tabela, com a mesma forma [items, setItems] do
  * useLocalStorage. setItems diffa o array anterior contra o novo (por id)
  * para decidir quais linhas inserir, atualizar ou remover no Supabase —
  * assim o código de cada módulo (que já chama setX(prev => [...])) não
  * precisou ser reescrito.
+ *
+ * `filter`, quando passado, restringe a query com `.in(column, values)` —
+ * usada para aplicar o clientAccess do colaborador direto no Postgres, e
+ * não depois no JS. `values: []` não faz nenhuma chamada de rede e resolve
+ * para uma lista vazia (colaborador sem nenhum cliente liberado).
  */
 export function useSupabaseTable<T extends { id: string }>(
   table: string,
   fromRow: (row: any) => T,
   toRow: (item: T) => Record<string, unknown>,
+  filter?: TableFilter | null,
 ) {
   const [items, setItems] = useState<T[]>([]);
   const itemsRef = useRef<T[]>([]);
   itemsRef.current = items;
 
+  const filterKey = filter ? `${filter.column}:${[...filter.values].sort().join(",")}` : "";
+
   useEffect(() => {
+    if (filter && filter.values.length === 0) {
+      setItems([]);
+      return;
+    }
+
     let cancelled = false;
-    supabase
-      .from(table)
-      .select("*")
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) {
-          console.error(`[supabase] falha ao carregar ${table}`, error);
-          return;
-        }
-        setItems((data ?? []).map(fromRow));
-      });
+    let query = supabase.from(table).select("*");
+    if (filter) query = query.in(filter.column, filter.values);
+    query.then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) {
+        console.error(`[supabase] falha ao carregar ${table}`, error);
+        return;
+      }
+      setItems((data ?? []).map(fromRow));
+    });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table]);
+  }, [table, filterKey]);
 
   const setValue = useCallback(
     (updater: Updater<T[]>) => {
