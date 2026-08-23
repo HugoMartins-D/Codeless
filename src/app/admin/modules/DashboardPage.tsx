@@ -4,7 +4,7 @@ import { useSupabaseTable } from "../lib/supabaseData";
 import { fromTaskRow, toTaskRow, fromTransactionRow, toTransactionRow, fromClientRow, toClientRow, fromContractRow, toContractRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
 import { useSession } from "../auth";
-import { useMyAccess, hasAccess } from "../lib/access";
+import { allowedClientIds, useMyAccess, hasAccess } from "../lib/access";
 import type { Client, Contract, Task, Transaction } from "../types";
 import { Panel, Badge, StatCard } from "../ui/primitives";
 import { ACCENT, currency, headingFont, monthKey, monthLabelFull } from "../ui/tokens";
@@ -19,10 +19,26 @@ export function DashboardPage() {
   const canContratos = hasAccess(access, "contratos");
   const canDemandas = hasAccess(access, "demandas");
 
+  const clientIds = allowedClientIds(access);
   const [tasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
-  const [transactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
-  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
-  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const [transactions] = useSupabaseTable<Transaction>(
+    "transactions",
+    fromTransactionRow,
+    toTransactionRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
+  const [clients] = useSupabaseTable<Client>(
+    "clients",
+    fromClientRow,
+    toClientRow,
+    clientIds ? { column: "id", values: clientIds } : null,
+  );
+  const [contracts] = useSupabaseTable<Contract>(
+    "contracts",
+    fromContractRow,
+    toContractRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
 
   const summary = useMemo(() => computeFinanceSummary(transactions), [transactions]);
 

@@ -13,9 +13,9 @@ import {
   fromContractRow,
   toContractRow,
 } from "../lib/mappers";
-import { getTaskUrgency, type TaskUrgency } from "../lib/demandas";
+import { getTaskUrgency, isSafeUrl, type TaskUrgency } from "../lib/demandas";
 import type { Client, Collaborator, Contract, Task, TaskStatus } from "../types";
-import { ADMIN_EMAIL, useMyAccess } from "../lib/access";
+import { ADMIN_EMAIL, allowedClientIds, useMyAccess } from "../lib/access";
 import { useSession } from "../auth";
 import { Panel, Field, TextInput, TextArea, SelectInput, Button, Badge } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
@@ -52,11 +52,34 @@ const emptyForm = {
 
 export function DemandasPage() {
   const access = useMyAccess(useSession() ?? null);
-  const [tasks, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
-  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const clientIds = allowedClientIds(access);
+  const [tasksRaw, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
+  const [clients] = useSupabaseTable<Client>(
+    "clients",
+    fromClientRow,
+    toClientRow,
+    clientIds ? { column: "id", values: clientIds } : null,
+  );
   const [collaborators] = useSupabaseTable<Collaborator>("collaborators", fromCollaboratorRow, toCollaboratorRow);
-  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const [contracts] = useSupabaseTable<Contract>(
+    "contracts",
+    fromContractRow,
+    toContractRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
   const [view, setView] = useLocalStorage<"lista" | "kanban">("admin_demandas_view", "lista");
+
+  // A tabela tasks não tem client_id (só um campo de texto livre "client"), então não dá pra
+  // filtrar no Postgres como nas outras tabelas — filtro por nome aqui é defesa em profundidade,
+  // não substitui uma coluna client_id + RLS própria em tasks.
+  const allowedClientNames = useMemo(
+    () => (clientIds ? new Set(clients.map((c) => c.name.trim().toLowerCase())) : null),
+    [clientIds, clients],
+  );
+  const tasks = useMemo(
+    () => (allowedClientNames ? tasksRaw.filter((t) => allowedClientNames.has(t.client.trim().toLowerCase())) : tasksRaw),
+    [tasksRaw, allowedClientNames],
+  );
 
   const assigneeOptions = [
     "Você (admin)",
@@ -104,6 +127,7 @@ export function DemandasPage() {
 
   function submit() {
     if (!form.title.trim()) return;
+    if (form.deliverableUrl.trim() && !isSafeUrl(form.deliverableUrl.trim())) return;
     if (editingId) {
       setTasks((prev) => prev.map((t) => (t.id === editingId ? { ...t, ...form } : t)));
     } else {
@@ -239,7 +263,7 @@ export function DemandasPage() {
                           </span>
                         )}
                       </button>
-                      {t.deliverableUrl && (
+                      {t.deliverableUrl && isSafeUrl(t.deliverableUrl) && (
                         <a
                           href={t.deliverableUrl}
                           target="_blank"

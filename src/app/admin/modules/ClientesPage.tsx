@@ -14,6 +14,8 @@ import {
 } from "../lib/mappers";
 import { parseSimpleCsv } from "../lib/csv";
 import type { Client, ClientStatus, ClientStatusHistoryEntry, Contract, Transaction } from "../types";
+import { allowedClientIds, useMyAccess } from "../lib/access";
+import { useSession } from "../auth";
 import { ClienteDetail } from "./ClienteDetail";
 import { Panel, Button, Badge } from "../ui/primitives";
 import { currency, headingFont } from "../ui/tokens";
@@ -28,13 +30,31 @@ const statusTone: Record<ClientStatus, "accent" | "warn" | "neutral" | "danger">
 };
 
 export function ClientesPage() {
-  const [clients, setClients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
-  const [transactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
-  const [contracts] = useSupabaseTable<Contract>("contracts", fromContractRow, toContractRow);
+  const access = useMyAccess(useSession() ?? null);
+  const clientIds = allowedClientIds(access);
+  const [clients, setClients] = useSupabaseTable<Client>(
+    "clients",
+    fromClientRow,
+    toClientRow,
+    clientIds ? { column: "id", values: clientIds } : null,
+  );
+  const [transactions] = useSupabaseTable<Transaction>(
+    "transactions",
+    fromTransactionRow,
+    toTransactionRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
+  const [contracts] = useSupabaseTable<Contract>(
+    "contracts",
+    fromContractRow,
+    toContractRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
   const [statusHistory, setStatusHistory] = useSupabaseTable<ClientStatusHistoryEntry>(
     "client_status_history",
     fromClientStatusHistoryRow,
     toClientStatusHistoryRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
   );
 
   const [filter, setFilter] = useState<ClientStatus | "todos">("todos");

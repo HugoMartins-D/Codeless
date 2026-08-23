@@ -17,7 +17,7 @@ export class AdminErrorBoundary extends Component<{ children: ReactNode }, { err
         <div className="min-h-screen flex items-center justify-center bg-[#050505] px-6 text-center">
           <div>
             <p className="text-white/80 text-sm mb-2">O painel interno encontrou um erro e não pôde carregar.</p>
-            <p className="text-white/30 text-xs">{this.state.error.message}</p>
+            <p className="text-white/30 text-xs">Algo deu errado. Tente recarregar a página.</p>
           </div>
         </div>
       );

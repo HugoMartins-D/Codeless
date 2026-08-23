@@ -16,6 +16,8 @@ export interface MyAccess {
   /** null só para o admin, que não tem linha em collaborators. */
   status: CollaboratorStatus | null;
   moduleAccess: string[];
+  /** "all" ou lista de ids de Client — usado para restringir queries por client_id. */
+  clientAccess: "all" | string[];
   canCreateDemandas: boolean;
 }
 
@@ -23,7 +25,19 @@ export function hasAccess(access: MyAccess, module: string): boolean {
   return access.isAdmin || access.moduleAccess.includes(module);
 }
 
-const initialState: MyAccess = { loading: true, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false };
+/** ids permitidos para filtrar queries (.in("client_id"|"id", ids)), ou null se não há restrição. */
+export function allowedClientIds(access: MyAccess): string[] | null {
+  return access.clientAccess === "all" ? null : access.clientAccess;
+}
+
+const initialState: MyAccess = {
+  loading: true,
+  isAdmin: false,
+  status: null,
+  moduleAccess: [],
+  clientAccess: "all",
+  canCreateDemandas: false,
+};
 
 export function useMyAccess(session: Session | null): MyAccess {
   const email = session?.user.email;
@@ -31,12 +45,19 @@ export function useMyAccess(session: Session | null): MyAccess {
 
   useEffect(() => {
     if (!email) {
-      setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false });
+      setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], clientAccess: [], canCreateDemandas: false });
       return;
     }
 
     if (email === ADMIN_EMAIL) {
-      setState({ loading: false, isAdmin: true, status: null, moduleAccess: [...GRANTABLE_MODULES], canCreateDemandas: true });
+      setState({
+        loading: false,
+        isAdmin: true,
+        status: null,
+        moduleAccess: [...GRANTABLE_MODULES],
+        clientAccess: "all",
+        canCreateDemandas: true,
+      });
       return;
     }
 
@@ -44,13 +65,14 @@ export function useMyAccess(session: Session | null): MyAccess {
     (async () => {
       const { data: existing, error: selectError } = await supabase
         .from("collaborators")
-        .select("status, module_access, can_create_demandas")
+        .select("status, module_access, client_access, can_create_demandas")
         .eq("email", email)
         .maybeSingle();
 
       if (selectError) {
         console.error("[access] falha ao buscar permissões", selectError);
-        if (!cancelled) setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], canCreateDemandas: false });
+        if (!cancelled)
+          setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], clientAccess: [], canCreateDemandas: false });
         return;
       }
 
@@ -58,8 +80,9 @@ export function useMyAccess(session: Session | null): MyAccess {
         const status = (existing.status ?? "pending") as CollaboratorStatus;
         // só concede acesso de verdade se um admin já aprovou explicitamente
         const moduleAccess = status === "approved" ? existing.module_access ?? [] : [];
+        const clientAccess: "all" | string[] = status === "approved" ? (existing.client_access ?? "all") : [];
         const canCreateDemandas = status === "approved" && !!existing.can_create_demandas && moduleAccess.includes("demandas");
-        if (!cancelled) setState({ loading: false, isAdmin: false, status, moduleAccess, canCreateDemandas });
+        if (!cancelled) setState({ loading: false, isAdmin: false, status, moduleAccess, clientAccess, canCreateDemandas });
         return;
       }
 
@@ -73,7 +96,8 @@ export function useMyAccess(session: Session | null): MyAccess {
         client_access: "all",
       });
       if (insertError) console.error("[access] falha ao auto-registrar colaborador", insertError);
-      if (!cancelled) setState({ loading: false, isAdmin: false, status: "pending", moduleAccess: [], canCreateDemandas: false });
+      if (!cancelled)
+        setState({ loading: false, isAdmin: false, status: "pending", moduleAccess: [], clientAccess: [], canCreateDemandas: false });
     })();
 
     return () => {

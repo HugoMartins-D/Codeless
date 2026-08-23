@@ -5,6 +5,8 @@ import { uid } from "../lib/storage";
 import { useSupabaseTable, useSupabaseSetting } from "../lib/supabaseData";
 import { fromTransactionRow, toTransactionRow, fromClientRow, toClientRow } from "../lib/mappers";
 import { computeFinanceSummary } from "../lib/finance";
+import { allowedClientIds, useMyAccess } from "../lib/access";
+import { useSession } from "../auth";
 import type { Client, Transaction, TransactionType } from "../types";
 import { Panel, Field, TextInput, SelectInput, Button, Badge, StatCard } from "../ui/primitives";
 import { Modal } from "../ui/Modal";
@@ -26,8 +28,20 @@ const emptyForm = {
 };
 
 export function FinanceiroPage() {
-  const [transactions, setTransactions] = useSupabaseTable<Transaction>("transactions", fromTransactionRow, toTransactionRow);
-  const [clients] = useSupabaseTable<Client>("clients", fromClientRow, toClientRow);
+  const access = useMyAccess(useSession() ?? null);
+  const clientIds = allowedClientIds(access);
+  const [transactions, setTransactions] = useSupabaseTable<Transaction>(
+    "transactions",
+    fromTransactionRow,
+    toTransactionRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
+  const [clients] = useSupabaseTable<Client>(
+    "clients",
+    fromClientRow,
+    toClientRow,
+    clientIds ? { column: "id", values: clientIds } : null,
+  );
   const [categories, setCategories] = useSupabaseSetting("financeiro_categories", DEFAULT_CATEGORIES);
   const [goal, setGoal] = useSupabaseSetting("financeiro_goal", 50000);
   const [goalDraft, setGoalDraft] = useState<string | null>(null);
