@@ -73,6 +73,8 @@ export interface Task {
   id: string;
   title: string;
   client: string;
+  /** Referência ao cliente (id de Client), opcional — usada para restringir por clientAccess/RLS. */
+  clientId?: string;
   /** O que a pessoa responsável precisa fazer. */
   description?: string;
   /** Uma demanda pode ter mais de um responsável. */

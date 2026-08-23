@@ -42,6 +42,7 @@ const urgencyStyle: Record<TaskUrgency, { color: string; Icon: LucideIcon | null
 const emptyForm = {
   title: "",
   client: "",
+  clientId: "",
   description: "",
   assignees: [] as string[],
   dueDate: "",
@@ -53,7 +54,12 @@ const emptyForm = {
 export function DemandasPage() {
   const access = useMyAccess(useSession() ?? null);
   const clientIds = allowedClientIds(access);
-  const [tasksRaw, setTasks] = useSupabaseTable<Task>("tasks", fromTaskRow, toTaskRow);
+  const [tasks, setTasks] = useSupabaseTable<Task>(
+    "tasks",
+    fromTaskRow,
+    toTaskRow,
+    clientIds ? { column: "client_id", values: clientIds } : null,
+  );
   const [clients] = useSupabaseTable<Client>(
     "clients",
     fromClientRow,
@@ -68,18 +74,6 @@ export function DemandasPage() {
     clientIds ? { column: "client_id", values: clientIds } : null,
   );
   const [view, setView] = useLocalStorage<"lista" | "kanban">("admin_demandas_view", "lista");
-
-  // A tabela tasks não tem client_id (só um campo de texto livre "client"), então não dá pra
-  // filtrar no Postgres como nas outras tabelas — filtro por nome aqui é defesa em profundidade,
-  // não substitui uma coluna client_id + RLS própria em tasks.
-  const allowedClientNames = useMemo(
-    () => (clientIds ? new Set(clients.map((c) => c.name.trim().toLowerCase())) : null),
-    [clientIds, clients],
-  );
-  const tasks = useMemo(
-    () => (allowedClientNames ? tasksRaw.filter((t) => allowedClientNames.has(t.client.trim().toLowerCase())) : tasksRaw),
-    [tasksRaw, allowedClientNames],
-  );
 
   const assigneeOptions = [
     "Você (admin)",
@@ -115,6 +109,7 @@ export function DemandasPage() {
     setForm({
       title: t.title,
       client: t.client,
+      clientId: t.clientId ?? "",
       description: t.description ?? "",
       assignees: t.assignees ?? [],
       dueDate: t.dueDate ?? "",
@@ -366,7 +361,11 @@ export function DemandasPage() {
           <Field label="Cliente">
             <TextInput
               value={form.client}
-              onChange={(e) => setForm({ ...form, client: e.target.value, contractId: "" })}
+              onChange={(e) => {
+                const client = e.target.value;
+                const match = clients.find((c) => c.name.trim().toLowerCase() === client.trim().toLowerCase());
+                setForm({ ...form, client, clientId: match?.id ?? "", contractId: "" });
+              }}
               list="clientes-list"
               placeholder="Nome do cliente"
             />
