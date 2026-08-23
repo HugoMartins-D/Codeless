@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schema.org",
+  "name": "CODE LESS",
+  "url": "https://codeless.com.br/",
+  "description": "Agência de criação de sites, landing pages e e-commerces sob medida. Cada projeto é desenhado do zero, sem templates, unindo estratégia, design autoral e desenvolvimento.",
+  "inLanguage": "pt-BR",
+  "services": [
+    "Sites institucionais",
+    "Web design & desenvolvimento",
+    "E-commerces"
+  ],
+  "process": ["Briefing", "Design", "Desenvolvimento", "Entrega & Suporte"],
+  "contact": {
+    "whatsapp": "https://wa.me/5547996258977"
+  }
+}
