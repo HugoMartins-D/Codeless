@@ -19,6 +19,11 @@ export function signIn(email: string, password: string): Promise<string | null> 
   return new Promise((resolve) => {
     user.authenticateUser(authDetails, {
       onSuccess: () => {
+        console.log(
+          "[auth] signIn onSuccess: chaves no sessionStorage agora =",
+          Object.keys(window.sessionStorage).filter((k) => k.includes("Cognito")),
+        );
+        console.log("[auth] signIn onSuccess: user.getUsername() =", user.getUsername());
         notifyAuthChange();
         resolve(null);
       },
