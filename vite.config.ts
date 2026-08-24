@@ -15,4 +15,10 @@ export default defineConfig({
   },
 
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  // amazon-cognito-identity-js (via node-forge/buffer) espera globais de Node
+  // que não existem no browser.
+  define: {
+    global: 'globalThis',
+  },
 })

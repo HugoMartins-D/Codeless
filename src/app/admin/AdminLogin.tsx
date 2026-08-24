@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Lock } from "lucide-react";
-import { signIn, signUp } from "./auth";
+import { signIn, signUp, confirmSignUp, resendConfirmationCode } from "./auth";
 
 export function AdminLogin() {
-  const [mode, setMode] = useState<"entrar" | "criar">("entrar");
+  const [mode, setMode] = useState<"entrar" | "criar" | "confirmar">("entrar");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,19 +27,35 @@ export function AdminLogin() {
       return;
     }
 
+    if (mode === "confirmar") {
+      const message = await confirmSignUp(email, code);
+      setLoading(false);
+      if (message) {
+        setError(message);
+        return;
+      }
+      setInfo("E-mail confirmado. Já pode entrar.");
+      setMode("entrar");
+      setCode("");
+      setPassword("");
+      return;
+    }
+
     const result = await signUp(email, password);
     setLoading(false);
     if (result.error) {
       setError(result.error);
       return;
     }
-    if (result.needsConfirmation) {
-      setInfo("Conta criada. Confirme seu e-mail para poder entrar.");
-      setMode("entrar");
-      setPassword("");
-      return;
-    }
-    setInfo("Conta criada. Aguarde a liberação de acesso pelo administrador.");
+    setInfo("Enviamos um código de confirmação para o seu e-mail.");
+    setMode("confirmar");
+  }
+
+  async function handleResendCode() {
+    setError(null);
+    const message = await resendConfirmationCode(email);
+    setInfo(message ? null : "Código reenviado.");
+    if (message) setError(message);
   }
 
   return (
@@ -65,40 +82,63 @@ export function AdminLogin() {
           Painel interno
         </h1>
         <p className="text-white/40 text-sm mb-6">
-          {mode === "entrar" ? "Acesso restrito. Entre com sua conta para continuar." : "Crie sua conta. O acesso às abas é liberado pelo administrador."}
+          {mode === "entrar" && "Acesso restrito. Entre com sua conta para continuar."}
+          {mode === "criar" && "Crie sua conta. O acesso às abas é liberado pelo administrador."}
+          {mode === "confirmar" && `Digite o código enviado para ${email}.`}
         </p>
 
-        <input
-          type="email"
-          autoFocus
-          autoComplete="email"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            setError(null);
-          }}
-          placeholder="E-mail"
-          className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-3 placeholder:text-white/30"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
-          }}
-        />
-        <input
-          type="password"
-          autoComplete={mode === "entrar" ? "current-password" : "new-password"}
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            setError(null);
-          }}
-          placeholder="Senha"
-          className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-2 placeholder:text-white/30"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
-          }}
-        />
+        {mode !== "confirmar" && (
+          <input
+            type="email"
+            autoFocus
+            autoComplete="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError(null);
+            }}
+            placeholder="E-mail"
+            className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-3 placeholder:text-white/30"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
+            }}
+          />
+        )}
+        {mode !== "confirmar" ? (
+          <input
+            type="password"
+            autoComplete={mode === "entrar" ? "current-password" : "new-password"}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(null);
+            }}
+            placeholder="Senha"
+            className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-2 placeholder:text-white/30"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
+            }}
+          />
+        ) : (
+          <input
+            type="text"
+            autoFocus
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value);
+              setError(null);
+            }}
+            placeholder="Código de confirmação"
+            className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none mb-2 placeholder:text-white/30"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${error ? "rgba(233,62,143,0.5)" : "rgba(255,255,255,0.1)"}`,
+            }}
+          />
+        )}
         {error && <p className="text-[#e93e8f] text-xs mb-4">{error}</p>}
         {info && <p className="text-[#c7d300] text-xs mb-4">{info}</p>}
 
@@ -114,20 +154,30 @@ export function AdminLogin() {
             color: "#c7d300",
           }}
         >
-          {loading ? "..." : mode === "entrar" ? "ENTRAR" : "CRIAR CONTA"}
+          {loading ? "..." : mode === "entrar" ? "ENTRAR" : mode === "criar" ? "CRIAR CONTA" : "CONFIRMAR"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "entrar" ? "criar" : "entrar");
-            setError(null);
-            setInfo(null);
-          }}
-          className="w-full mt-3 text-center text-xs text-white/30 hover:text-white/60 transition-colors"
-        >
-          {mode === "entrar" ? "Não tem conta? Criar conta" : "Já tem conta? Entrar"}
-        </button>
+        {mode === "confirmar" ? (
+          <button
+            type="button"
+            onClick={handleResendCode}
+            className="w-full mt-3 text-center text-xs text-white/30 hover:text-white/60 transition-colors"
+          >
+            Reenviar código
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "entrar" ? "criar" : "entrar");
+              setError(null);
+              setInfo(null);
+            }}
+            className="w-full mt-3 text-center text-xs text-white/30 hover:text-white/60 transition-colors"
+          >
+            {mode === "entrar" ? "Não tem conta? Criar conta" : "Já tem conta? Entrar"}
+          </button>
+        )}
       </form>
     </div>
   );

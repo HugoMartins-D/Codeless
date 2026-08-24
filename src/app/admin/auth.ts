@@ -1,38 +1,78 @@
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "./lib/supabaseClient";
+import { CognitoUser, AuthenticationDetails, CognitoUserAttribute } from "amazon-cognito-identity-js";
+import { userPool } from "./lib/cognitoClient";
 
-export async function signIn(email: string, password: string): Promise<string | null> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  return error ? error.message : null;
+export interface Session {
+  user: { id: string; email: string };
 }
 
-/** Retorna null+precisaConfirmar quando o cadastro exige confirmação por e-mail (sem sessão ainda). */
-export async function signUp(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    // sem isso, o link do e-mail de confirmação cai no "Site URL" configurado
-    // no dashboard do Supabase (que pode estar apontando pro localhost de dev),
-    // não importa de onde a pessoa realmente se cadastrou.
-    options: { emailRedirectTo: `${window.location.origin}/admin` },
+const AUTH_EVENT = "codeless-auth-change";
+
+function notifyAuthChange() {
+  window.dispatchEvent(new Event(AUTH_EVENT));
+}
+
+export function signIn(email: string, password: string): Promise<string | null> {
+  const user = new CognitoUser({ Username: email, Pool: userPool });
+  const authDetails = new AuthenticationDetails({ Username: email, Password: password });
+  return new Promise((resolve) => {
+    user.authenticateUser(authDetails, {
+      onSuccess: () => {
+        notifyAuthChange();
+        resolve(null);
+      },
+      onFailure: (err) => resolve(err.message ?? "Falha ao entrar."),
+    });
   });
-  if (error) return { error: error.message, needsConfirmation: false };
-  return { error: null, needsConfirmation: !data.session };
+}
+
+/** Cognito sempre exige confirmar um código enviado por e-mail antes do primeiro login. */
+export function signUp(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
+  return new Promise((resolve) => {
+    userPool.signUp(email, password, [new CognitoUserAttribute({ Name: "email", Value: email })], [], (err) => {
+      if (err) return resolve({ error: err.message ?? "Falha ao criar conta.", needsConfirmation: false });
+      resolve({ error: null, needsConfirmation: true });
+    });
+  });
+}
+
+export function confirmSignUp(email: string, code: string): Promise<string | null> {
+  const user = new CognitoUser({ Username: email, Pool: userPool });
+  return new Promise((resolve) => {
+    user.confirmRegistration(code, true, (err) => resolve(err ? err.message ?? "Código inválido." : null));
+  });
+}
+
+export function resendConfirmationCode(email: string): Promise<string | null> {
+  const user = new CognitoUser({ Username: email, Pool: userPool });
+  return new Promise((resolve) => {
+    user.resendConfirmationCode((err) => resolve(err ? err.message ?? "Falha ao reenviar código." : null));
+  });
 }
 
 export async function signOut(): Promise<void> {
-  await supabase.auth.signOut();
+  userPool.getCurrentUser()?.signOut();
+  notifyAuthChange();
 }
 
-export async function getSession(): Promise<Session | null> {
-  const { data } = await supabase.auth.getSession();
-  return data.session;
+export function getSession(): Promise<Session | null> {
+  const user = userPool.getCurrentUser();
+  if (!user) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    user.getSession((err: Error | null, session: any) => {
+      if (err || !session?.isValid()) return resolve(null);
+      const claims = session.getIdToken().payload;
+      resolve({ user: { id: claims.sub, email: claims.email } });
+    });
+  });
 }
 
 export function onAuthChange(callback: (session: Session | null) => void): () => void {
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session));
-  return () => data.subscription.unsubscribe();
+  const handler = () => {
+    getSession().then(callback);
+  };
+  window.addEventListener(AUTH_EVENT, handler);
+  return () => window.removeEventListener(AUTH_EVENT, handler);
 }
 
 /** undefined = ainda carregando a sessão inicial; null = sem sessão. */

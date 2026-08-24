@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "./supabaseClient";
-import { uid } from "./storage";
+import type { Session } from "../auth";
+import { apiGet } from "./apiClient";
 import type { CollaboratorStatus } from "../types";
 
-/** Precisa bater com a função public.is_admin() no banco. */
+/** Precisa bater com o ADMIN_EMAIL de cada Lambda em infra/lambdas/*. */
 export const ADMIN_EMAIL = "djhugomartis2018@gmail.com";
 
 /** Módulos que o admin pode conceder a outros logins pela tela de Acessos. */
@@ -49,55 +48,29 @@ export function useMyAccess(session: Session | null): MyAccess {
       return;
     }
 
-    if (email === ADMIN_EMAIL) {
-      setState({
-        loading: false,
-        isAdmin: true,
-        status: null,
-        moduleAccess: [...GRANTABLE_MODULES],
-        clientAccess: "all",
-        canCreateDemandas: true,
-      });
-      return;
-    }
-
     let cancelled = false;
     (async () => {
-      const { data: existing, error: selectError } = await supabase
-        .from("collaborators")
-        .select("status, module_access, client_access, can_create_demandas")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (selectError) {
-        console.error("[access] falha ao buscar permissões", selectError);
+      // /me resolve isAdmin/status/moduleAccess/clientAccess no backend (Lambda) e,
+      // no primeiro login, autorregistra o colaborador como "pending" — mesma lógica
+      // que antes vivia aqui no cliente, só que agora atrás da API.
+      try {
+        const me = await apiGet<{
+          isAdmin: boolean;
+          status: CollaboratorStatus | null;
+          moduleAccess: string[];
+          clientAccess: "all" | string[];
+          canCreateDemandas: boolean;
+        }>("/me");
+        if (!cancelled && me) {
+          setState({ loading: false, ...me });
+        } else if (!cancelled) {
+          setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], clientAccess: [], canCreateDemandas: false });
+        }
+      } catch (err) {
+        console.error("[access] falha ao buscar permissões", err);
         if (!cancelled)
           setState({ loading: false, isAdmin: false, status: null, moduleAccess: [], clientAccess: [], canCreateDemandas: false });
-        return;
       }
-
-      if (existing) {
-        const status = (existing.status ?? "pending") as CollaboratorStatus;
-        // só concede acesso de verdade se um admin já aprovou explicitamente
-        const moduleAccess = status === "approved" ? existing.module_access ?? [] : [];
-        const clientAccess: "all" | string[] = status === "approved" ? (existing.client_access ?? "all") : [];
-        const canCreateDemandas = status === "approved" && !!existing.can_create_demandas && moduleAccess.includes("demandas");
-        if (!cancelled) setState({ loading: false, isAdmin: false, status, moduleAccess, clientAccess, canCreateDemandas });
-        return;
-      }
-
-      // Primeiro login desse e-mail: registra como pendente, aguardando aprovação do admin.
-      const { error: insertError } = await supabase.from("collaborators").insert({
-        id: uid(),
-        name: email.split("@")[0],
-        email,
-        status: "pending",
-        module_access: [],
-        client_access: "all",
-      });
-      if (insertError) console.error("[access] falha ao auto-registrar colaborador", insertError);
-      if (!cancelled)
-        setState({ loading: false, isAdmin: false, status: "pending", moduleAccess: [], clientAccess: [], canCreateDemandas: false });
     })();
 
     return () => {
