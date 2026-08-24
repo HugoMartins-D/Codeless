@@ -50,6 +50,27 @@ export function resendConfirmationCode(email: string): Promise<string | null> {
   });
 }
 
+/** Envia por e-mail um código pra redefinir a senha (fluxo "esqueci minha senha"). */
+export function forgotPassword(email: string): Promise<string | null> {
+  const user = new CognitoUser({ Username: email, Pool: userPool });
+  return new Promise((resolve) => {
+    user.forgotPassword({
+      onSuccess: () => resolve(null),
+      onFailure: (err) => resolve(err.message ?? "Falha ao solicitar redefinição."),
+    });
+  });
+}
+
+export function confirmForgotPassword(email: string, code: string, newPassword: string): Promise<string | null> {
+  const user = new CognitoUser({ Username: email, Pool: userPool });
+  return new Promise((resolve) => {
+    user.confirmPassword(code, newPassword, {
+      onSuccess: () => resolve(null),
+      onFailure: (err) => resolve(err.message ?? "Código inválido."),
+    });
+  });
+}
+
 export async function signOut(): Promise<void> {
   userPool.getCurrentUser()?.signOut();
   notifyAuthChange();
