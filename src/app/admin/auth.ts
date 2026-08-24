@@ -9,6 +9,7 @@ export interface Session {
 const AUTH_EVENT = "codeless-auth-change";
 
 function notifyAuthChange() {
+  console.log("[auth] notifyAuthChange: disparando evento");
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
@@ -87,11 +88,20 @@ export async function signOut(): Promise<void> {
 
 export function getSession(): Promise<Session | null> {
   const user = userPool.getCurrentUser();
+  console.log("[auth] getSession: getCurrentUser() =", user?.getUsername?.() ?? null);
   if (!user) return Promise.resolve(null);
   return new Promise((resolve) => {
     user.getSession((err: Error | null, session: any) => {
-      if (err || !session?.isValid()) return resolve(null);
+      if (err) {
+        console.error("[auth] getSession: user.getSession deu erro", err);
+        return resolve(null);
+      }
+      if (!session?.isValid()) {
+        console.warn("[auth] getSession: sessão presente mas inválida/expirada");
+        return resolve(null);
+      }
       const claims = session.getIdToken().payload;
+      console.log("[auth] getSession: sessão válida para", claims.email);
       resolve({ user: { id: claims.sub, email: claims.email } });
     });
   });
@@ -99,7 +109,11 @@ export function getSession(): Promise<Session | null> {
 
 export function onAuthChange(callback: (session: Session | null) => void): () => void {
   const handler = () => {
-    getSession().then(callback);
+    console.log("[auth] onAuthChange: evento recebido, resolvendo sessão");
+    getSession().then((s) => {
+      console.log("[auth] onAuthChange: callback chamado com", s);
+      callback(s);
+    });
   };
   window.addEventListener(AUTH_EVENT, handler);
   return () => window.removeEventListener(AUTH_EVENT, handler);
@@ -114,5 +128,6 @@ export function useSession(): Session | null | undefined {
     return onAuthChange(setSession);
   }, []);
 
+  console.log("[auth] useSession render, session =", session);
   return session;
 }
