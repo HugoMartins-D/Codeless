@@ -21,7 +21,16 @@ export function signIn(email: string, password: string): Promise<string | null> 
         notifyAuthChange();
         resolve(null);
       },
-      onFailure: (err) => resolve(err.message ?? "Falha ao entrar."),
+      onFailure: (err) => {
+        console.error("[auth] signIn onFailure", err);
+        resolve(err?.message || "Falha ao entrar.");
+      },
+      // Challenges que este app não suporta hoje — sem isso, a Promise nunca resolvia
+      // e o botão ficava girando pra sempre sem erro nenhum aparecer.
+      newPasswordRequired: () => resolve("Essa conta precisa definir uma senha nova — use 'Esqueci minha senha'."),
+      mfaRequired: () => resolve("Essa conta exige verificação em duas etapas, não suportada neste painel."),
+      totpRequired: () => resolve("Essa conta exige verificação em duas etapas, não suportada neste painel."),
+      customChallenge: () => resolve("Essa conta exige uma verificação extra, não suportada neste painel."),
     });
   });
 }

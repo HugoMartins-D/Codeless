@@ -20,8 +20,8 @@ export function AdminLogin() {
     if (mode === "entrar") {
       const message = await signIn(email, password);
       setLoading(false);
-      if (message) {
-        setError("E-mail ou senha incorretos.");
+      if (message !== null) {
+        setError(message || "E-mail ou senha incorretos.");
         setPassword("");
       }
       // login bem-sucedido: onAuthChange no AdminApp cuida da transição de tela
