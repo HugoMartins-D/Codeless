@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase } from "./supabaseClient";
+import { apiGet, apiSend } from "./apiClient";
 
 type Updater<T> = T | ((prev: T) => T);
 
@@ -7,35 +7,45 @@ function resolve<T>(updater: Updater<T>, prev: T): T {
   return typeof updater === "function" ? (updater as (p: T) => T)(prev) : updater;
 }
 
-/** Restringe a query a linhas cuja `column` esteja em `values` — usado para aplicar clientAccess no Postgres. */
+/** Mapeia o nome de "tabela" (herdado do Supabase) para o caminho real da API nova. */
+const TABLE_ENDPOINT: Record<string, string> = {
+  clients: "/clients",
+  transactions: "/transactions",
+  contracts: "/contracts",
+  tasks: "/tasks",
+  collaborators: "/collaborators",
+  client_status_history: "/status-history",
+  profiles: "/profiles",
+};
+
+/** Restringe a query a linhas cuja `column` esteja em `values` — mantido só por compatibilidade de assinatura;
+ * a restrição por clientAccess agora é aplicada no backend (Lambda), a partir do JWT do usuário logado. */
 export interface TableFilter {
   column: string;
   values: string[];
 }
 
 /**
- * Coleção de linhas de uma tabela, com a mesma forma [items, setItems] do
- * useLocalStorage. setItems diffa o array anterior contra o novo (por id)
- * para decidir quais linhas inserir, atualizar ou remover no Supabase —
- * assim o código de cada módulo (que já chama setX(prev => [...])) não
- * precisou ser reescrito.
+ * Coleção de itens de um recurso da API, com a mesma forma [items, setItems] do
+ * useLocalStorage. setItems diffa o array anterior contra o novo (por id) para
+ * decidir quais itens criar, atualizar ou remover via HTTP — assim o código de
+ * cada módulo (que já chama setX(prev => [...])) não precisou ser reescrito.
  *
- * `filter`, quando passado, restringe a query com `.in(column, values)` —
- * usada para aplicar o clientAccess do colaborador direto no Postgres, e
- * não depois no JS. `values: []` não faz nenhuma chamada de rede e resolve
- * para uma lista vazia (colaborador sem nenhum cliente liberado).
+ * `fromRow`/`toRow` são aceitos só por compatibilidade com as chamadas existentes
+ * (vinham de lib/mappers.ts, para converter linhas snake_case do Postgres) — a API
+ * nova já devolve/recebe os itens no formato final usado pelo app, então não são
+ * mais necessários e ficam sem uso aqui.
  */
 export function useSupabaseTable<T extends { id: string }>(
   table: string,
-  fromRow: (row: any) => T,
-  toRow: (item: T) => Record<string, unknown>,
+  _fromRow: (row: any) => T,
+  _toRow: (item: T) => Record<string, unknown>,
   filter?: TableFilter | null,
 ) {
+  const endpoint = TABLE_ENDPOINT[table] ?? `/${table}`;
   const [items, setItems] = useState<T[]>([]);
   const itemsRef = useRef<T[]>([]);
   itemsRef.current = items;
-
-  const filterKey = filter ? `${filter.column}:${[...filter.values].sort().join(",")}` : "";
 
   useEffect(() => {
     if (filter && filter.values.length === 0) {
@@ -44,21 +54,16 @@ export function useSupabaseTable<T extends { id: string }>(
     }
 
     let cancelled = false;
-    let query = supabase.from(table).select("*");
-    if (filter) query = query.in(filter.column, filter.values);
-    query.then(({ data, error }) => {
-      if (cancelled) return;
-      if (error) {
-        console.error(`[supabase] falha ao carregar ${table}`, error);
-        return;
-      }
-      setItems((data ?? []).map(fromRow));
-    });
+    apiGet<T[]>(endpoint)
+      .then((data) => {
+        if (!cancelled) setItems(data ?? []);
+      })
+      .catch((err) => console.error(`[api] falha ao carregar ${endpoint}`, err));
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table, filterKey]);
+  }, [endpoint]);
 
   const setValue = useCallback(
     (updater: Updater<T[]>) => {
@@ -77,27 +82,16 @@ export function useSupabaseTable<T extends { id: string }>(
       });
 
       removed.forEach((i) => {
-        supabase
-          .from(table)
-          .delete()
-          .eq("id", i.id)
-          .then(({ error }) => error && console.error(`[supabase] falha ao remover ${table}`, error));
+        apiSend(`${endpoint}/${i.id}`, "DELETE").catch((err) => console.error(`[api] falha ao remover ${endpoint}`, err));
       });
       added.forEach((i) => {
-        supabase
-          .from(table)
-          .insert(toRow(i))
-          .then(({ error }) => error && console.error(`[supabase] falha ao inserir ${table}`, error));
+        apiSend(endpoint, "POST", i).catch((err) => console.error(`[api] falha ao inserir ${endpoint}`, err));
       });
       updated.forEach((i) => {
-        supabase
-          .from(table)
-          .update(toRow(i))
-          .eq("id", i.id)
-          .then(({ error }) => error && console.error(`[supabase] falha ao atualizar ${table}`, error));
+        apiSend(`${endpoint}/${i.id}`, "PUT", i).catch((err) => console.error(`[api] falha ao atualizar ${endpoint}`, err));
       });
     },
-    [table],
+    [endpoint],
   );
 
   return [items, setValue] as const;
@@ -105,26 +99,18 @@ export function useSupabaseTable<T extends { id: string }>(
 
 /**
  * Um único valor de configuração (categorias, meta, template) guardado em
- * app_settings, com a mesma forma [value, setValue] do useLocalStorage.
+ * /settings/{key}, com a mesma forma [value, setValue] do useLocalStorage.
  */
 export function useSupabaseSetting<T>(key: string, initial: T) {
   const [value, setValueState] = useState<T>(initial);
 
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("app_settings")
-      .select("value")
-      .eq("key", key)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) {
-          console.error(`[supabase] falha ao carregar setting ${key}`, error);
-          return;
-        }
-        if (data) setValueState(data.value as T);
-      });
+    apiGet<{ value: T }>(`/settings/${key}`)
+      .then((data) => {
+        if (!cancelled && data) setValueState(data.value);
+      })
+      .catch((err) => console.error(`[api] falha ao carregar setting ${key}`, err));
     return () => {
       cancelled = true;
     };
@@ -135,10 +121,7 @@ export function useSupabaseSetting<T>(key: string, initial: T) {
     (updater: Updater<T>) => {
       setValueState((prev) => {
         const next = resolve(updater, prev);
-        supabase
-          .from("app_settings")
-          .upsert({ key, value: next as never })
-          .then(({ error }) => error && console.error(`[supabase] falha ao salvar setting ${key}`, error));
+        apiSend(`/settings/${key}`, "PUT", { value: next }).catch((err) => console.error(`[api] falha ao salvar setting ${key}`, err));
         return next;
       });
     },

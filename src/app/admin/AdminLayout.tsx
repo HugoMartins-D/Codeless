@@ -14,7 +14,7 @@ export function AdminLayout({ modules }: { modules: AdminModule[] }) {
   const [profiles, setProfiles] = useSupabaseTable<Profile>("profiles", fromProfileRow, toProfileRow);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  const myProfile = profiles.find((p) => p.id === session?.user.id) ?? {
+  const myProfile = profiles.find((p) => p.email === session?.user.email) ?? {
     id: session?.user.id ?? "",
     email: session?.user.email ?? "",
     name: session?.user.email?.split("@")[0] ?? "",
