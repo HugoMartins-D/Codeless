@@ -244,8 +244,14 @@ export function ClienteDetail({
                       </div>
                       {c.projectObject && <p className="text-white/50 text-sm mb-1.5">{c.projectObject}</p>}
                       <p className="text-white/30 text-xs">
-                        {currency(c.implementationValue)} implantação
-                        {c.monthlyValue > 0 && ` · ${currency(c.monthlyValue)}/mês`}
+                        {c.paymentType === "permuta" ? (
+                          "Permuta"
+                        ) : (
+                          <>
+                            {currency(c.implementationValue)} implantação
+                            {c.monthlyValue > 0 && ` · ${currency(c.monthlyValue)}/mês`}
+                          </>
+                        )}
                       </p>
                     </div>
                   ))}

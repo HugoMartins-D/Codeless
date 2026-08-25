@@ -3,7 +3,7 @@ import { X, Eye, EyeOff, Download, Save } from "lucide-react";
 import { uid } from "../lib/storage";
 import { generateContractText, downloadTextFile } from "../lib/contract";
 import { renderContractBlocks } from "../lib/contractFormat";
-import type { Client, Contract, ContractSignatory, ContractStatus } from "../types";
+import type { Client, Contract, ContractPaymentType, ContractSignatory, ContractStatus } from "../types";
 import { Field, TextInput, SelectInput, TextArea, Button } from "../ui/primitives";
 import { headingFont, parseDecimal } from "../ui/tokens";
 
@@ -14,10 +14,12 @@ function formFromContract(c: Contract | null) {
     clientAddress: c?.clientAddress ?? "",
     clientRepresentative: c?.clientRepresentative ?? "",
     projectObject: c?.projectObject ?? "",
+    paymentType: c?.paymentType ?? ("dinheiro" as ContractPaymentType),
     implementationValue: c ? String(c.implementationValue) : "",
     implementationDueDate: c?.implementationDueDate ?? "",
     monthlyValue: c ? String(c.monthlyValue) : "",
     monthlyDueDay: c ? String(c.monthlyDueDay) : "25",
+    permutaDescription: c?.permutaDescription ?? "",
     signatoryNames: c?.signatories.map((s) => s.name) ?? ([] as string[]),
     city: c?.city ?? "Balneário Camboriú",
   };
@@ -85,10 +87,12 @@ export function ContractEditor({
       clientAddress: form.clientAddress,
       clientRepresentative: form.clientRepresentative,
       projectObject: form.projectObject,
+      paymentType: form.paymentType,
       implementationValue,
       implementationDueDate: form.implementationDueDate || undefined,
       monthlyValue,
       monthlyDueDay: Number(form.monthlyDueDay) || 25,
+      permutaDescription: form.permutaDescription || undefined,
       signatories: roster.filter((m) => form.signatoryNames.includes(m.name)),
       city: form.city,
       status,
@@ -103,10 +107,14 @@ export function ContractEditor({
   const validationErrors = useMemo(() => {
     const errs: string[] = [];
     if (!form.clientCompanyName.trim()) errs.push("Nome da empresa");
-    if (!draft.implementationValue) errs.push("Valor de implantação");
+    if (form.paymentType === "permuta") {
+      if (!form.permutaDescription.trim()) errs.push("Descrição da permuta");
+    } else if (!draft.implementationValue) {
+      errs.push("Valor de implantação");
+    }
     if (draft.signatories.length === 0) errs.push("Pelo menos um responsável pra assinar");
     return errs;
-  }, [form.clientCompanyName, draft.implementationValue, draft.signatories]);
+  }, [form.clientCompanyName, form.paymentType, form.permutaDescription, draft.implementationValue, draft.signatories]);
 
   function handleSave() {
     setSaveAttempted(true);
@@ -196,30 +204,64 @@ export function ContractEditor({
 
             <div>
               <p className="text-white/40 text-[11px] tracking-widest uppercase mb-3">Honorários</p>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <Field label="Valor de implantação (R$)">
-                  <TextInput
-                    value={form.implementationValue}
-                    onChange={(e) => setForm({ ...form, implementationValue: e.target.value })}
-                    inputMode="decimal"
+              <div className="flex gap-2 mb-4">
+                {(["dinheiro", "permuta"] as ContractPaymentType[]).map((type) => {
+                  const active = form.paymentType === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setForm({ ...form, paymentType: type })}
+                      className="flex-1 rounded-lg py-2 text-xs tracking-wide transition-colors"
+                      style={{
+                        background: active ? "rgba(199,211,0,0.10)" : "rgba(255,255,255,0.03)",
+                        border: active ? "1px solid rgba(199,211,0,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                        color: active ? "#c7d300" : "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      {type === "dinheiro" ? "Pagamento em dinheiro" : "Pagamento por permuta"}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {form.paymentType === "permuta" ? (
+                <Field label="Descrição da permuta">
+                  <TextArea
+                    rows={3}
+                    value={form.permutaDescription}
+                    onChange={(e) => setForm({ ...form, permutaDescription: e.target.value })}
+                    placeholder="Ex: em troca do desenvolvimento do sistema, o CONTRATANTE fornecerá aos CONTRATADOS 12 (doze) meses de hospedagem em seu servidor."
                   />
                 </Field>
-                <Field label="Vencimento da implantação">
-                  <TextInput
-                    type="date"
-                    value={form.implementationDueDate}
-                    onChange={(e) => setForm({ ...form, implementationDueDate: e.target.value })}
-                  />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Mensalidade de manutenção (R$)">
-                  <TextInput value={form.monthlyValue} onChange={(e) => setForm({ ...form, monthlyValue: e.target.value })} inputMode="decimal" />
-                </Field>
-                <Field label="Dia do vencimento mensal">
-                  <TextInput value={form.monthlyDueDay} onChange={(e) => setForm({ ...form, monthlyDueDay: e.target.value })} inputMode="numeric" />
-                </Field>
-              </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <Field label="Valor de implantação (R$)">
+                      <TextInput
+                        value={form.implementationValue}
+                        onChange={(e) => setForm({ ...form, implementationValue: e.target.value })}
+                        inputMode="decimal"
+                      />
+                    </Field>
+                    <Field label="Vencimento da implantação">
+                      <TextInput
+                        type="date"
+                        value={form.implementationDueDate}
+                        onChange={(e) => setForm({ ...form, implementationDueDate: e.target.value })}
+                      />
+                    </Field>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Mensalidade de manutenção (R$)">
+                      <TextInput value={form.monthlyValue} onChange={(e) => setForm({ ...form, monthlyValue: e.target.value })} inputMode="decimal" />
+                    </Field>
+                    <Field label="Dia do vencimento mensal">
+                      <TextInput value={form.monthlyDueDay} onChange={(e) => setForm({ ...form, monthlyDueDay: e.target.value })} inputMode="numeric" />
+                    </Field>
+                  </div>
+                </>
+              )}
             </div>
 
             <div>

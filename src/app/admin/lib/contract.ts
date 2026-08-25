@@ -40,17 +40,7 @@ Parágrafo Único. Ao término da vigência, o contrato poderá ser renovado med
 
 CLÁUSULA 3ª – DA RETRIBUIÇÃO E FORMA DE PAGAMENTO
 
-Pelos serviços objeto deste contrato, o CONTRATANTE pagará aos CONTRATADOS:
-
-I – o valor de {{valor_implantacao}}, referente ao desenvolvimento, implantação e disponibilização do sistema/projeto contratado;
-
-II – o valor mensal de {{valor_mensal}}, referente aos serviços de manutenção, suporte técnico, monitoramento, atualizações e correções, durante toda a vigência deste contrato.
-
-Parágrafo Primeiro. O valor previsto no inciso I será pago em parcela única, com vencimento em {{data_vencimento_implantacao}}, ou em outra forma previamente ajustada entre as partes.
-
-Parágrafo Segundo. A mensalidade prevista no inciso II vencerá todo dia {{dia_vencimento_mensal}} de cada mês, iniciando-se após a entrega e aceite do sistema, devendo ser paga por PIX, transferência bancária, boleto ou outro meio acordado entre as partes.
-
-Parágrafo Terceiro. A mensalidade de manutenção compreende exclusivamente os serviços de suporte técnico, monitoramento, correções e atualizações do sistema, não abrangendo o desenvolvimento de novas funcionalidades, módulos, integrações ou alterações estruturais, que dependerão de orçamento e aprovação prévia do CONTRATANTE.
+{{clausula_pagamento}}
 
 CLÁUSULA 4ª – DAS OBRIGAÇÕES DOS CONTRATADOS
 
@@ -162,6 +152,32 @@ function assinaturasBlock(signatories: ContractSignatory[]): string {
     .join("\n\n\n");
 }
 
+function paymentClauseBlock(contract: Contract): string {
+  if (contract.paymentType === "permuta") {
+    return `Pelos serviços objeto deste contrato, as partes ajustam o pagamento mediante permuta de produtos e/ou serviços, nos seguintes termos:
+
+${contract.permutaDescription?.trim() || "___"}
+
+Parágrafo Único. A permuta ora ajustada substitui integralmente a obrigação de pagamento em dinheiro pelos serviços de desenvolvimento, implantação e manutenção previstos neste contrato, dando as partes plena e recíproca quitação na medida do valor permutado.`;
+  }
+
+  const dataVencimento = contract.implementationDueDate
+    ? new Date(contract.implementationDueDate).toLocaleDateString("pt-BR")
+    : "___/___/____";
+
+  return `Pelos serviços objeto deste contrato, o CONTRATANTE pagará aos CONTRATADOS:
+
+I – o valor de ${currency(contract.implementationValue)}, referente ao desenvolvimento, implantação e disponibilização do sistema/projeto contratado;
+
+II – o valor mensal de ${currency(contract.monthlyValue)}, referente aos serviços de manutenção, suporte técnico, monitoramento, atualizações e correções, durante toda a vigência deste contrato.
+
+Parágrafo Primeiro. O valor previsto no inciso I será pago em parcela única, com vencimento em ${dataVencimento}, ou em outra forma previamente ajustada entre as partes.
+
+Parágrafo Segundo. A mensalidade prevista no inciso II vencerá todo dia ${contract.monthlyDueDay} de cada mês, iniciando-se após a entrega e aceite do sistema, devendo ser paga por PIX, transferência bancária, boleto ou outro meio acordado entre as partes.
+
+Parágrafo Terceiro. A mensalidade de manutenção compreende exclusivamente os serviços de suporte técnico, monitoramento, correções e atualizações do sistema, não abrangendo o desenvolvimento de novas funcionalidades, módulos, integrações ou alterações estruturais, que dependerão de orçamento e aprovação prévia do CONTRATANTE.`;
+}
+
 export function generateContractText(template: string, contract: Contract): string {
   return template
     .replaceAll("{{contratante_nome}}", contract.clientCompanyName)
@@ -169,10 +185,7 @@ export function generateContractText(template: string, contract: Contract): stri
     .replaceAll("{{contratante_endereco}}", contract.clientAddress)
     .replaceAll("{{contratante_representante}}", contract.clientRepresentative)
     .replaceAll("{{projeto_objeto}}", contract.projectObject)
-    .replaceAll("{{valor_implantacao}}", currency(contract.implementationValue))
-    .replaceAll("{{valor_mensal}}", currency(contract.monthlyValue))
-    .replaceAll("{{data_vencimento_implantacao}}", contract.implementationDueDate ? new Date(contract.implementationDueDate).toLocaleDateString("pt-BR") : "___/___/____")
-    .replaceAll("{{dia_vencimento_mensal}}", String(contract.monthlyDueDay))
+    .replaceAll("{{clausula_pagamento}}", paymentClauseBlock(contract))
     .replaceAll("{{contratados_qualificacao}}", qualificacaoBlock(contract.signatories))
     .replaceAll("{{contratados_assinaturas}}", assinaturasBlock(contract.signatories))
     .replaceAll("{{cidade}}", contract.city)
