@@ -132,7 +132,7 @@ Parágrafo Terceiro. Fica estabelecida multa contratual correspondente a 10% (de
 
 CLÁUSULA 8ª - DO FORO
 
-As partes elegem o foro da Comarca de Balneário Camboriú para dirimir quaisquer dúvidas ou controvérsias oriundas deste contrato.
+As partes elegem o foro da Comarca de {{cidade}} para dirimir quaisquer dúvidas ou controvérsias oriundas deste contrato.
 
 E assim, por estarem de justo acordo, as partes assinam este instrumento em 02 (duas) vias de idêntico teor e forma, na presença de 02 (duas) testemunhas, ao fim arroladas.
 
