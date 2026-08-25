@@ -21,6 +21,8 @@ export interface ContractSignatory {
   role?: string;
 }
 
+export type ContractPaymentType = "dinheiro" | "permuta";
+
 export interface Contract {
   id: string;
   clientCompanyName: string;
@@ -28,10 +30,13 @@ export interface Contract {
   clientAddress: string;
   clientRepresentative: string;
   projectObject: string;
+  paymentType: ContractPaymentType;
   implementationValue: number;
   implementationDueDate?: string; // yyyy-mm-dd, opcional
   monthlyValue: number;
   monthlyDueDay: number; // dia do mês, ex: 25
+  /** O que é permutado (produto/serviço) — só relevante quando paymentType === "permuta". */
+  permutaDescription?: string;
   /** Nome+CPF travados no momento da criação — não muda se o time (roster) mudar depois. */
   signatories: ContractSignatory[];
   city: string;

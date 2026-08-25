@@ -147,7 +147,7 @@ export function ContratosPage() {
                   <p className="text-white/80 text-sm truncate">{c.clientCompanyName.toUpperCase()}</p>
                   <p className="text-white/30 text-xs truncate">
                     {c.projectObject ? `${c.projectObject.slice(0, 40)}${c.projectObject.length > 40 ? "…" : ""} · ` : ""}
-                    {currency(c.implementationValue)}
+                    {c.paymentType === "permuta" ? "Permuta" : currency(c.implementationValue)}
                   </p>
                 </div>
               </div>
