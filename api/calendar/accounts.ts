@@ -1,7 +1,7 @@
 import type { ServerResponse } from "http";
-import { requireUser } from "../_lib/auth";
-import { listAccounts, deleteAccount, type Provider } from "../_lib/accounts";
-import { bearerToken, send, withErrorHandling, type ApiRequest } from "../_lib/http";
+import { requireUser } from "../_lib/auth.js";
+import { listAccounts, deleteAccount, type Provider } from "../_lib/accounts.js";
+import { bearerToken, send, withErrorHandling, type ApiRequest } from "../_lib/http.js";
 
 export default withErrorHandling(async (req: ApiRequest, res: ServerResponse) => {
   const user = await requireUser(bearerToken(req));

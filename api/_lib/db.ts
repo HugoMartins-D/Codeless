@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { resolveDatabaseUrl } from "./env";
+import { resolveDatabaseUrl } from "./env.js";
 
 // Reaproveita o Pool entre invocações da mesma Lambda (cold start) — cada
 // invocação nova de módulo criaria um pool novo e vazaria conexões.

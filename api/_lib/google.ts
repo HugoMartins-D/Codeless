@@ -1,4 +1,4 @@
-import { requireEnv } from "./env";
+import { requireEnv } from "./env.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CALENDAR_BASE = "https://www.googleapis.com/calendar/v3/calendars/primary/events";

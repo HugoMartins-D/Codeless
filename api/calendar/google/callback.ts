@@ -1,9 +1,9 @@
 import type { ServerResponse } from "http";
 import { jwtVerify } from "jose";
-import { exchangeGoogleCode } from "../../_lib/google";
-import { updateGoogleTokens } from "../../_lib/accounts";
-import { withErrorHandling, type ApiRequest } from "../../_lib/http";
-import { requireEnv } from "../../_lib/env";
+import { exchangeGoogleCode } from "../../_lib/google.js";
+import { updateGoogleTokens } from "../../_lib/accounts.js";
+import { withErrorHandling, type ApiRequest } from "../../_lib/http.js";
+import { requireEnv } from "../../_lib/env.js";
 
 function stateSecret(): Uint8Array {
   return new TextEncoder().encode(requireEnv("GOOGLE_CLIENT_SECRET"));

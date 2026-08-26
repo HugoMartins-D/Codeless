@@ -1,8 +1,8 @@
 import type { ServerResponse } from "http";
-import { requireUser } from "../../_lib/auth";
-import { verifyAppleCredentials } from "../../_lib/apple";
-import { saveAccount, deleteAccount } from "../../_lib/accounts";
-import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../../_lib/http";
+import { requireUser } from "../../_lib/auth.js";
+import { verifyAppleCredentials } from "../../_lib/apple.js";
+import { saveAccount, deleteAccount } from "../../_lib/accounts.js";
+import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../../_lib/http.js";
 
 export default withErrorHandling(async (req: ApiRequest, res: ServerResponse) => {
   const user = await requireUser(bearerToken(req));

@@ -1,11 +1,11 @@
 import type { ServerResponse } from "http";
-import { requireUser } from "../../_lib/auth";
-import { getAccount, updateGoogleTokens, type GoogleCredentials, type AppleCredentials } from "../../_lib/accounts";
-import { ensureFreshAccessToken, updateGoogleEvent, deleteGoogleEvent, type CalendarEventInput } from "../../_lib/google";
-import { updateAppleEvent, deleteAppleEvent } from "../../_lib/apple";
-import { setLink, deleteLink } from "../../_lib/links";
-import { decodeEventId } from "../../_lib/eventId";
-import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../../_lib/http";
+import { requireUser } from "../../_lib/auth.js";
+import { getAccount, updateGoogleTokens, type GoogleCredentials, type AppleCredentials } from "../../_lib/accounts.js";
+import { ensureFreshAccessToken, updateGoogleEvent, deleteGoogleEvent, type CalendarEventInput } from "../../_lib/google.js";
+import { updateAppleEvent, deleteAppleEvent } from "../../_lib/apple.js";
+import { setLink, deleteLink } from "../../_lib/links.js";
+import { decodeEventId } from "../../_lib/eventId.js";
+import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../../_lib/http.js";
 
 export default withErrorHandling(async (req: ApiRequest, res: ServerResponse) => {
   const user = await requireUser(bearerToken(req));
