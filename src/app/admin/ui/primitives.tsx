@@ -1,5 +1,6 @@
+import { Children, isValidElement, useEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import { ChevronDown, type LucideIcon } from "lucide-react";
 import { ACCENT, DANGER, panelStyle } from "./tokens";
 
 export function Panel({
@@ -34,11 +35,82 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputBase} ${props.className ?? ""}`} />;
 }
 
-export function SelectInput(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  // Sem isso, navegadores baseados em Chromium (Opera GX incluso) renderizam o
-  // dropdown nativo com fundo branco do tema claro do SO, deixando o texto
-  // branco do app ilegível sobre ele.
-  return <select {...props} style={{ colorScheme: "dark", ...props.style }} className={`${inputBase} ${props.className ?? ""}`} />;
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+function optionsFromChildren(children: ReactNode): SelectOption[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (!isValidElement(child) || child.type !== "option") return [];
+    const optionProps = child.props as { value?: string; children?: ReactNode; disabled?: boolean };
+    return [
+      {
+        value: String(optionProps.value ?? ""),
+        label: typeof optionProps.children === "string" ? optionProps.children : String(optionProps.children ?? ""),
+        disabled: optionProps.disabled,
+      },
+    ];
+  });
+}
+
+/**
+ * O <select> nativo delega o dropdown ao SO/navegador, e o Opera GX (e outros
+ * Chromium) ignora color-scheme e renderiza as opções com fundo claro do
+ * sistema, deixando o texto branco do app ilegível. Por isso o dropdown é
+ * inteiramente próprio (botão + lista posicionada), sempre no tema do app.
+ */
+export function SelectInput({ value, onChange, children, className = "", disabled }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const options = optionsFromChildren(children);
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  function selectOption(optionValue: string) {
+    setOpen(false);
+    onChange?.({ target: { value: optionValue } } as unknown as React.ChangeEvent<HTMLSelectElement>);
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+        className={`${inputBase} flex items-center justify-between gap-2 text-left disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      >
+        <span className={`truncate ${selected ? "" : "text-white/25"}`}>{selected?.label ?? ""}</span>
+        <ChevronDown size={14} className="text-white/30 shrink-0 transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined }} />
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 right-0 mt-1.5 rounded-lg py-1 max-h-56 overflow-y-auto z-50"
+          style={{ background: "#141416", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}
+        >
+          {options.map((o) => (
+            <div
+              key={o.value}
+              onClick={() => !o.disabled && selectOption(o.value)}
+              className={`px-3 py-2 text-sm transition-colors ${o.disabled ? "opacity-30" : "cursor-pointer hover:bg-white/[0.06]"}`}
+              style={{ color: o.value === value ? ACCENT : "rgba(255,255,255,0.8)" }}
+            >
+              {o.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
