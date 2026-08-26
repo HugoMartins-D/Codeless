@@ -35,7 +35,10 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
 }
 
 export function SelectInput(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${inputBase} ${props.className ?? ""}`} />;
+  // Sem isso, navegadores baseados em Chromium (Opera GX incluso) renderizam o
+  // dropdown nativo com fundo branco do tema claro do SO, deixando o texto
+  // branco do app ilegível sobre ele.
+  return <select {...props} style={{ colorScheme: "dark", ...props.style }} className={`${inputBase} ${props.className ?? ""}`} />;
 }
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
