@@ -7,7 +7,7 @@ import type { CollaboratorStatus } from "../types";
 export const ADMIN_EMAIL = "djhugomartis2018@gmail.com";
 
 /** Módulos que o admin pode conceder a outros logins pela tela de Acessos. */
-export const GRANTABLE_MODULES = ["financeiro", "contratos", "demandas", "clientes"] as const;
+export const GRANTABLE_MODULES = ["financeiro", "contratos", "demandas", "clientes", "agenda"] as const;
 
 export interface MyAccess {
   loading: boolean;

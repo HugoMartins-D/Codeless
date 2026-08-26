@@ -5,6 +5,7 @@ import {
   Users,
   LayoutDashboard,
   ShieldCheck,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -14,6 +15,7 @@ import { DemandasPage } from "./modules/DemandasPage";
 import { ClientesPage } from "./modules/ClientesPage";
 import { DashboardPage } from "./modules/DashboardPage";
 import { AcessosPage } from "./modules/AcessosPage";
+import { AgendaPage } from "./modules/AgendaPage";
 
 export interface AdminModule {
   slug: string;
@@ -28,5 +30,6 @@ export const adminModules: AdminModule[] = [
   { slug: "contratos", title: "Contratos", icon: FileText, component: ContratosPage },
   { slug: "demandas", title: "Demandas", icon: KanbanSquare, component: DemandasPage },
   { slug: "clientes", title: "Clientes", icon: Users, component: ClientesPage },
+  { slug: "agenda", title: "Agenda", icon: CalendarDays, component: AgendaPage },
   { slug: "acessos", title: "Acessos", icon: ShieldCheck, component: AcessosPage },
 ];
