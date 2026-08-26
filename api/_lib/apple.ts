@@ -1,6 +1,6 @@
 import { createDAVClient } from "tsdav";
 import ical from "node-ical";
-import type { CalendarEventInput, GoogleEvent as CalendarEvent } from "./google";
+import type { CalendarEventInput, GoogleEvent as CalendarEvent } from "./google.js";
 
 const SERVER_URL = "https://caldav.icloud.com";
 

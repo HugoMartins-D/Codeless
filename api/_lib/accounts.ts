@@ -1,6 +1,6 @@
-import { db } from "./db";
-import type { GoogleCredentials } from "./google";
-import type { AppleCredentials } from "./apple";
+import { db } from "./db.js";
+import type { GoogleCredentials } from "./google.js";
+import type { AppleCredentials } from "./apple.js";
 
 export type Provider = "google" | "apple";
 

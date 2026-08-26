@@ -1,9 +1,9 @@
 import type { ServerResponse } from "http";
 import { SignJWT } from "jose";
-import { requireUser } from "../../_lib/auth";
-import { buildGoogleAuthUrl } from "../../_lib/google";
-import { bearerToken, send, withErrorHandling, type ApiRequest } from "../../_lib/http";
-import { requireEnv } from "../../_lib/env";
+import { requireUser } from "../../_lib/auth.js";
+import { buildGoogleAuthUrl } from "../../_lib/google.js";
+import { bearerToken, send, withErrorHandling, type ApiRequest } from "../../_lib/http.js";
+import { requireEnv } from "../../_lib/env.js";
 
 function stateSecret(): Uint8Array {
   return new TextEncoder().encode(requireEnv("GOOGLE_CLIENT_SECRET"));

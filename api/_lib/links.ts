@@ -1,5 +1,5 @@
-import { db } from "./db";
-import type { Provider } from "./accounts";
+import { db } from "./db.js";
+import type { Provider } from "./accounts.js";
 
 export interface EventLink {
   contractId?: string;

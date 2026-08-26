@@ -1,12 +1,12 @@
 import type { ServerResponse } from "http";
-import { requireUser } from "../_lib/auth";
-import { getAccount, type GoogleCredentials, type AppleCredentials } from "../_lib/accounts";
-import { ensureFreshAccessToken, listGoogleEvents, createGoogleEvent, type CalendarEventInput } from "../_lib/google";
-import { listAppleEvents, createAppleEvent } from "../_lib/apple";
-import { updateGoogleTokens } from "../_lib/accounts";
-import { getLinks, setLink } from "../_lib/links";
-import { encodeEventId } from "../_lib/eventId";
-import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../_lib/http";
+import { requireUser } from "../_lib/auth.js";
+import { getAccount, type GoogleCredentials, type AppleCredentials } from "../_lib/accounts.js";
+import { ensureFreshAccessToken, listGoogleEvents, createGoogleEvent, type CalendarEventInput } from "../_lib/google.js";
+import { listAppleEvents, createAppleEvent } from "../_lib/apple.js";
+import { updateGoogleTokens } from "../_lib/accounts.js";
+import { getLinks, setLink } from "../_lib/links.js";
+import { encodeEventId } from "../_lib/eventId.js";
+import { bearerToken, readJsonBody, send, withErrorHandling, type ApiRequest } from "../_lib/http.js";
 
 async function listAllEvents(userId: string) {
   const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // últimos 30 dias pra frente
