@@ -12,7 +12,6 @@ function formFromContract(c: Contract | null) {
     clientCompanyName: c?.clientCompanyName ?? "",
     clientCnpj: c?.clientCnpj ?? "",
     clientAddress: c?.clientAddress ?? "",
-    clientRepresentative: c?.clientRepresentative ?? "",
     projectObject: c?.projectObject ?? "",
     paymentType: c?.paymentType ?? ("dinheiro" as ContractPaymentType),
     installmentType: c?.installmentType ?? ("integral" as ContractInstallmentType),
@@ -51,6 +50,22 @@ export function ContractEditor({
   const [newMember, setNewMember] = useState({ name: "", cpf: "", role: "" });
   const [previewOpen, setPreviewOpen] = useState(true);
 
+  const [representatives, setRepresentatives] = useState<ContractSignatory[]>(
+    initial?.clientRepresentatives?.length ? initial.clientRepresentatives : [{ name: "", cpf: "", role: "" }],
+  );
+
+  function updateRepresentative(index: number, patch: Partial<ContractSignatory>) {
+    setRepresentatives((reps) => reps.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  }
+
+  function addRepresentative() {
+    setRepresentatives((reps) => [...reps, { name: "", cpf: "", role: "" }]);
+  }
+
+  function removeRepresentative(index: number) {
+    setRepresentatives((reps) => (reps.length > 1 ? reps.filter((_, i) => i !== index) : reps));
+  }
+
   function toggleSignatory(name: string) {
     setForm((f) => ({
       ...f,
@@ -86,7 +101,7 @@ export function ContractEditor({
       clientCompanyName: form.clientCompanyName || "—",
       clientCnpj: form.clientCnpj,
       clientAddress: form.clientAddress,
-      clientRepresentative: form.clientRepresentative,
+      clientRepresentatives: representatives.filter((r) => r.name.trim()),
       projectObject: form.projectObject,
       paymentType: form.paymentType,
       installmentType: form.installmentType,
@@ -101,7 +116,7 @@ export function ContractEditor({
       createdAt: initial?.createdAt ?? new Date().toISOString().slice(0, 10),
       clientId: selectedClientId || undefined,
     };
-  }, [form, roster, initial, selectedClientId, status]);
+  }, [form, roster, initial, selectedClientId, status, representatives]);
 
   const previewText = useMemo(() => generateContractText(template, draft), [template, draft]);
 
@@ -115,8 +130,9 @@ export function ContractEditor({
       errs.push("Valor de implantação");
     }
     if (draft.signatories.length === 0) errs.push("Pelo menos um responsável pra assinar");
+    if (draft.clientRepresentatives.length === 0) errs.push("Pelo menos um representante do contratante");
     return errs;
-  }, [form.clientCompanyName, form.paymentType, form.permutaDescription, draft.implementationValue, draft.signatories]);
+  }, [form.clientCompanyName, form.paymentType, form.permutaDescription, draft.implementationValue, draft.signatories, draft.clientRepresentatives]);
 
   function handleSave() {
     setSaveAttempted(true);
@@ -178,17 +194,53 @@ export function ContractEditor({
                 <Field label="Nome da empresa">
                   <TextInput value={form.clientCompanyName} onChange={(e) => setForm({ ...form, clientCompanyName: e.target.value })} />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="CPF/CNPJ">
-                    <TextInput value={form.clientCnpj} onChange={(e) => setForm({ ...form, clientCnpj: e.target.value })} />
-                  </Field>
-                  <Field label="Representante legal">
-                    <TextInput value={form.clientRepresentative} onChange={(e) => setForm({ ...form, clientRepresentative: e.target.value })} />
-                  </Field>
-                </div>
+                <Field label="CPF/CNPJ">
+                  <TextInput value={form.clientCnpj} onChange={(e) => setForm({ ...form, clientCnpj: e.target.value })} />
+                </Field>
                 <Field label="Endereço">
                   <TextInput value={form.clientAddress} onChange={(e) => setForm({ ...form, clientAddress: e.target.value })} />
                 </Field>
+
+                <div>
+                  <span className="text-white/50 text-xs tracking-wide mb-1.5 block">
+                    Representantes / sócios que assinam pelo contratante
+                  </span>
+                  <div className="flex flex-col gap-2">
+                    {representatives.map((rep, i) => (
+                      <div key={i} className="flex gap-2">
+                        <TextInput
+                          placeholder="Nome"
+                          value={rep.name}
+                          onChange={(e) => updateRepresentative(i, { name: e.target.value })}
+                          className="!py-1.5"
+                        />
+                        <TextInput
+                          placeholder="CPF"
+                          value={rep.cpf}
+                          onChange={(e) => updateRepresentative(i, { cpf: e.target.value })}
+                          className="!py-1.5 !w-32"
+                        />
+                        <TextInput
+                          placeholder="Função (opcional)"
+                          value={rep.role ?? ""}
+                          onChange={(e) => updateRepresentative(i, { role: e.target.value })}
+                          className="!py-1.5 !w-40"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeRepresentative(i)}
+                          disabled={representatives.length === 1}
+                          className="text-white/20 hover:text-[#e93e8f] disabled:opacity-30 disabled:pointer-events-none shrink-0"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={addRepresentative} className="text-[#c7d300] text-xs mt-2">
+                    + Adicionar sócio/representante
+                  </button>
+                </div>
               </div>
             </div>
 

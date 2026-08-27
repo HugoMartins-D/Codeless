@@ -31,7 +31,8 @@ export interface Contract {
   clientCompanyName: string;
   clientCnpj: string;
   clientAddress: string;
-  clientRepresentative: string;
+  /** Um ou mais representantes/sócios que assinam pelo CONTRATANTE. */
+  clientRepresentatives: ContractSignatory[];
   projectObject: string;
   paymentType: ContractPaymentType;
   installmentType: ContractInstallmentType;
