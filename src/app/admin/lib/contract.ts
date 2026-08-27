@@ -12,7 +12,7 @@ export const DEFAULT_TEMPLATE = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE DESENVO
 
 Pelo presente instrumento particular de contrato de prestação de serviços, de um lado:
 
-CONTRATANTE: {{contratante_nome}}, pessoa física ou jurídica inscrita no CPF/CNPJ sob nº {{contratante_cpf/cnpj}}, com sede à {{contratante_endereco}}, neste ato representada por {{contratante_representante}}, doravante denominada simplesmente CONTRATANTE.
+CONTRATANTE: {{contratante_nome}}, pessoa física ou jurídica inscrita no CPF/CNPJ sob nº {{contratante_cpf/cnpj}}, com sede à {{contratante_endereco}}, neste ato representada por {{contratante_representantes}}, doravante denominada simplesmente CONTRATANTE.
 
 E, de outro lado:
 
@@ -128,12 +128,7 @@ E assim, por estarem de justo acordo, as partes assinam este instrumento em 02 (
 
 {{cidade}}, {{data_assinatura}}.
 
-CONTRATANTE:
-
-____________________________________________
-{{contratante_nome}}
-Por {{contratante_representante}}
-Representante Legal
+{{contratante_assinaturas}}
 
 {{contratados_assinaturas}}`;
 
@@ -141,6 +136,23 @@ function qualificacaoBlock(signatories: ContractSignatory[]): string {
   return signatories
     .map((m) => `${m.name.toUpperCase()}${m.role ? `, ${m.role}` : ""}, inscrito no CPF nº ${m.cpf};`)
     .join("\n\n");
+}
+
+function representantesQualificacaoText(reps: ContractSignatory[]): string {
+  if (reps.length === 0) return "seu representante legal";
+  const parts = reps.map((r) => `${r.name}${r.role ? `, ${r.role}` : ""}${r.cpf ? `, inscrito no CPF nº ${r.cpf}` : ""}`);
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} e ${parts[parts.length - 1]}`;
+}
+
+function contratanteAssinaturasBlock(companyName: string, reps: ContractSignatory[]): string {
+  const list = reps.length > 0 ? reps : [{ name: "", cpf: "" } as ContractSignatory];
+  return list
+    .map(
+      (r) =>
+        `CONTRATANTE:\n\n____________________________________________\n${companyName}\nPor ${r.name}\n${r.role || "Representante Legal"}${r.cpf ? `\nCPF nº ${r.cpf}` : ""}`,
+    )
+    .join("\n\n\n");
 }
 
 function assinaturasBlock(signatories: ContractSignatory[]): string {
@@ -189,7 +201,8 @@ export function generateContractText(template: string, contract: Contract): stri
     .replaceAll("{{contratante_nome}}", contract.clientCompanyName)
     .replaceAll("{{contratante_cpf/cnpj}}", contract.clientCnpj)
     .replaceAll("{{contratante_endereco}}", contract.clientAddress)
-    .replaceAll("{{contratante_representante}}", contract.clientRepresentative)
+    .replaceAll("{{contratante_representantes}}", representantesQualificacaoText(contract.clientRepresentatives))
+    .replaceAll("{{contratante_assinaturas}}", contratanteAssinaturasBlock(contract.clientCompanyName, contract.clientRepresentatives))
     .replaceAll("{{projeto_objeto}}", contract.projectObject)
     .replaceAll("{{clausula_pagamento}}", paymentClauseBlock(contract))
     .replaceAll("{{contratados_qualificacao}}", qualificacaoBlock(contract.signatories))
