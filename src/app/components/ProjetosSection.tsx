@@ -33,10 +33,11 @@ const projects: ShowcaseProject[] = [
     glow: "#e93e8f",
   },
   {
-    title: "Dra. Helena Cristina Martins",
+    title: "Especialite Itajaí SC",
     year: "2026",
-    tags: ["Landing Page", "Em breve"],
+    tags: ["Landing Page"],
     image: "",
+    link: "https://www.instagram.com/especialiteitajaisc/",
     glow: "#4fd1c5",
   },
 ];
@@ -85,7 +86,7 @@ function CardMedia({ project }: { project: ShowcaseProject }) {
       <StripedBackdrop color={project.glow} />
       <p className="relative z-10 text-white/25 text-sm tracking-[0.3em] uppercase"
         style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-        {project.title} em breve
+        {project.title}{project.tags.includes("Em breve") ? " em breve" : ""}
       </p>
     </div>
   );
