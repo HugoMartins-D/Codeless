@@ -3,7 +3,7 @@ import { X, Eye, EyeOff, Download, Save } from "lucide-react";
 import { uid } from "../lib/storage";
 import { generateContractText, downloadTextFile } from "../lib/contract";
 import { renderContractBlocks } from "../lib/contractFormat";
-import type { Client, Contract, ContractPaymentType, ContractSignatory, ContractStatus } from "../types";
+import type { Client, Contract, ContractInstallmentType, ContractPaymentType, ContractSignatory, ContractStatus } from "../types";
 import { Field, TextInput, SelectInput, TextArea, Button } from "../ui/primitives";
 import { headingFont, parseDecimal } from "../ui/tokens";
 
@@ -15,6 +15,7 @@ function formFromContract(c: Contract | null) {
     clientRepresentative: c?.clientRepresentative ?? "",
     projectObject: c?.projectObject ?? "",
     paymentType: c?.paymentType ?? ("dinheiro" as ContractPaymentType),
+    installmentType: c?.installmentType ?? ("integral" as ContractInstallmentType),
     implementationValue: c ? String(c.implementationValue) : "",
     implementationDueDate: c?.implementationDueDate ?? "",
     monthlyValue: c ? String(c.monthlyValue) : "",
@@ -88,6 +89,7 @@ export function ContractEditor({
       clientRepresentative: form.clientRepresentative,
       projectObject: form.projectObject,
       paymentType: form.paymentType,
+      installmentType: form.installmentType,
       implementationValue,
       implementationDueDate: form.implementationDueDate || undefined,
       monthlyValue,
@@ -236,6 +238,17 @@ export function ContractEditor({
                 </Field>
               ) : (
                 <>
+                  <Field label="Forma de pagamento da implantação">
+                    <SelectInput
+                      value={form.installmentType}
+                      onChange={(e) => setForm({ ...form, installmentType: e.target.value as ContractInstallmentType })}
+                      className="mb-4"
+                    >
+                      <option value="integral">Integral</option>
+                      <option value="parcelado">Em duas parcelas (50% assinatura + 50% entrega)</option>
+                      <option value="cartao">Cartão de crédito</option>
+                    </SelectInput>
+                  </Field>
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <Field label="Valor de implantação (R$)">
                       <TextInput
