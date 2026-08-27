@@ -122,7 +122,7 @@ export function HeroSection() {
             Ver projetos <ArrowDownRight size={16} strokeWidth={2.5} />
           </button>
           <button
-            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+            onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-white/15 text-white/70 text-sm tracking-wide
                        hover:border-white/30 hover:text-white transition-all"
             style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 500 }}
