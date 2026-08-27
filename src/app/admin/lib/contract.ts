@@ -165,13 +165,19 @@ Parágrafo Único. A permuta ora ajustada substitui integralmente a obrigação 
     ? new Date(contract.implementationDueDate).toLocaleDateString("pt-BR")
     : "___/___/____";
 
+  const paragrafoPrimeiro = {
+    integral: `Parágrafo Primeiro. O valor previsto no inciso I será pago em parcela única, com vencimento em ${dataVencimento}, ou em outra forma previamente ajustada entre as partes.`,
+    parcelado: `Parágrafo Primeiro. O valor previsto no inciso I será pago em 2 (duas) parcelas iguais de 50% (cinquenta por cento) cada, sendo a primeira devida na assinatura deste contrato e a segunda na entrega do sistema/projeto contratado, ou em outra forma previamente ajustada entre as partes.`,
+    cartao: `Parágrafo Primeiro. O valor previsto no inciso I será pago via cartão de crédito, podendo o CONTRATANTE optar pelo parcelamento diretamente com a operadora do cartão, sem qualquer ônus adicional aos CONTRATADOS além das taxas normalmente aplicáveis à transação.`,
+  }[contract.installmentType];
+
   return `Pelos serviços objeto deste contrato, o CONTRATANTE pagará aos CONTRATADOS:
 
 I – o valor de ${currency(contract.implementationValue)}, referente ao desenvolvimento, implantação e disponibilização do sistema/projeto contratado;
 
 II – o valor mensal de ${currency(contract.monthlyValue)}, referente aos serviços de manutenção, suporte técnico, monitoramento, atualizações e correções, durante toda a vigência deste contrato.
 
-Parágrafo Primeiro. O valor previsto no inciso I será pago em parcela única, com vencimento em ${dataVencimento}, ou em outra forma previamente ajustada entre as partes.
+${paragrafoPrimeiro}
 
 Parágrafo Segundo. A mensalidade prevista no inciso II vencerá todo dia ${contract.monthlyDueDay} de cada mês, iniciando-se após a entrega e aceite do sistema, devendo ser paga por PIX, transferência bancária, boleto ou outro meio acordado entre as partes.
 

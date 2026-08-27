@@ -23,6 +23,9 @@ export interface ContractSignatory {
 
 export type ContractPaymentType = "dinheiro" | "permuta";
 
+/** Só relevante quando paymentType === "dinheiro" — como o valor de implantação é cobrado. */
+export type ContractInstallmentType = "integral" | "parcelado" | "cartao";
+
 export interface Contract {
   id: string;
   clientCompanyName: string;
@@ -31,6 +34,7 @@ export interface Contract {
   clientRepresentative: string;
   projectObject: string;
   paymentType: ContractPaymentType;
+  installmentType: ContractInstallmentType;
   implementationValue: number;
   implementationDueDate?: string; // yyyy-mm-dd, opcional
   monthlyValue: number;
