@@ -128,7 +128,7 @@ function FeaturedCard({ project, delay }: { project: ShowcaseProject; delay: num
             {project.title}
           </p>
           <button
-            onClick={() => window.open(project.link || "https://wa.me/5547996258977", "_blank")}
+            onClick={() => window.open(project.link || "https://wa.me/5547997444575", "_blank")}
             className="inline-flex items-center gap-1.5 text-white/50 text-xs group-hover:text-[#c7d300] transition-colors"
           >
             Ver projeto <ArrowRight size={14} strokeWidth={2.5} />
@@ -154,7 +154,7 @@ function PlaceholderCard({ delay }: { delay: number }) {
         boxShadow: "0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
         minHeight: 540,
       }}
-      onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+      onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
     >
       <StripedBackdrop color="#ffffff" />
 
@@ -255,7 +255,7 @@ export function ProjetosSection() {
           className="mt-20 text-center"
         >
           <button
-            onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
+            onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
             className="px-10 py-4 rounded-full text-white text-sm tracking-widest transition-all hover:scale-105 active:scale-95"
             style={{
               fontFamily: "'Montserrat', sans-serif",
