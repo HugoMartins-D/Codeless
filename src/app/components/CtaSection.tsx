@@ -75,7 +75,7 @@ export function CtaSection() {
           <div className="flex flex-wrap gap-4">
             {/* Primary — solid glass */}
             <button
-              onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
+              onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
               className="px-8 py-4 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
               style={{
                 fontFamily: "'Montserrat', sans-serif", fontWeight: 700,

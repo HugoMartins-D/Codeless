@@ -17,7 +17,7 @@ export function VendorSection() {
         <motion.button
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15 }}
-          onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
+          onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
           className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-black text-sm font-bold tracking-widest uppercase transition-all hover:scale-105 active:scale-95"
           style={{
             fontFamily: "'Montserrat', sans-serif",

@@ -213,7 +213,7 @@ export function FeaturesSection() {
               ajustar e evoluir o que foi construído.
             </p>
             <button
-              onClick={() => window.open("https://wa.me/5547997444575", "_blank")}
+              onClick={() => window.open("https://wa.me/5547996258977", "_blank")}
               className="self-start inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-black text-sm transition-all hover:scale-105 active:scale-95"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
