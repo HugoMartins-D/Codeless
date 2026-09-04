@@ -24,7 +24,7 @@ const menuItems = [
 ];
 
 const socialItems = [
-  { label: "WhatsApp", link: "https://wa.me/5547997444575" },
+  { label: "WhatsApp", link: "https://wa.me/5547996258977" },
   { label: "Instagram", link: "#" },
 ];
 
